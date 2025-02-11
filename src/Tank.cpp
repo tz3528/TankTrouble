@@ -84,10 +84,20 @@ namespace TankTrouble {
 		tmpDirection = direction;
 		point normalVector = direction.normalVector();
 		if ((direction ^ normalVector) > 0) {
-			direction = direction - normalVector / 40;
+			if (isBackward) {
+				direction = direction + normalVector / 40;
+			}
+			else {
+				direction = direction - normalVector / 40;
+			}
 		}
 		else {
-			direction = direction + normalVector / 40;
+			if (isBackward) {
+				direction = direction - normalVector / 40;
+			}
+			else {
+				direction = direction + normalVector / 40;
+			}
 		}
 		direction = direction / norm(direction);
 		getTank();
@@ -103,10 +113,21 @@ namespace TankTrouble {
 		tmpDirection = direction;
 		point normalVector = direction.normalVector();
 		if ((direction ^ normalVector) > 0) {
-			direction = direction + normalVector / 40;
+			if (isBackward) {
+				direction = direction - normalVector / 40;
+			}
+			else {
+				direction = direction + normalVector / 40;
+			}
+
 		}
 		else {
-			direction = direction - normalVector / 40;
+			if (isBackward) {
+				direction = direction + normalVector / 40;
+			}
+			else {
+				direction = direction - normalVector / 40;
+			}
 		}
 		direction = direction / norm(direction);
 		getTank();
