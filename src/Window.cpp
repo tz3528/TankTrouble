@@ -89,10 +89,6 @@ namespace TankTrouble
 		SelectObject(hdcMem, oldBrush);
 		DeleteObject(whiteBrush);
 
-		// ÆôÓÃ¿¹¾â³Ý
-		SetGraphicsMode(hdcMem, GM_ADVANCED);
-		SetBkMode(hdcMem, TRANSPARENT);
-
 		// »æÖÆÌ¹¿Ë
 		for (auto& Tank : TankPool) {
 			Tank->draw(hdcMem);
