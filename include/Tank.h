@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <list>
 #include <memory>
+#include <chrono>
 
 constexpr int PLAYER = 0;
 constexpr int COMPUTER = 1;
@@ -38,11 +39,12 @@ namespace TankTrouble
         bool isAttack = false;
 
     private:
-        int id, size, bullets = 10;
+        int id, size, bullets = 20;
         int controller;
         double movingStep, length, width;
         point tmpPosition, tmpDirection;
-
+        const int attackInterval = 100;
+        std::chrono::steady_clock::time_point lastAttack;
     };
 
     extern std::list<std::shared_ptr<Tank>> TankPool;

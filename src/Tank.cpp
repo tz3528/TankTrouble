@@ -7,11 +7,9 @@
 #include <graphics.h>
 #include <windows.h>
 #include <mmsystem.h>
-#include <gdiplus.h>
 
-#pragma comment (lib,"Gdiplus.lib")
+
 #pragma comment(lib, "Winmm.lib")
-using namespace Gdiplus;
 
 namespace TankTrouble {
 
@@ -142,17 +140,17 @@ namespace TankTrouble {
 		if (bullets == 0) return;
 		point bpos = position + direction * length * 3 / 4;
 
-		//HANDLE g_hOutput = 0;
-		//g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-  //      char tmp[256] = {0};
-  //      sprintf_s(tmp, sizeof(tmp), "%d %d %d %d %d %d\n", (int)bpos.x, (int)bpos.y,LeftWall, RightWall, UpWall, BottomWall);
-  //      WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
-
 		if (bpos.x < LeftWall ||
 			bpos.x > RightWall ||
 			bpos.y < UpWall ||
 			bpos.y > BottomWall)
 			return;
+
+		auto now = std::chrono::steady_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastAttack).count();
+		if (duration < attackInterval) return;
+		lastAttack = now;
+
 		bullets--;
 
 		{

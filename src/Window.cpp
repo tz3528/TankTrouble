@@ -217,8 +217,8 @@ namespace TankTrouble
 
 		MSG message;
 
-		AllocConsole();
-		g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		//AllocConsole();
+		//g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		//char tmp[256] = { 0 };
 		//sprintf_s(tmp, sizeof(tmp), "%d %d %d %d\n", LeftWall, RightWall, UpWall, BottomWall);
 		//WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
