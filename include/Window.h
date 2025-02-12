@@ -44,7 +44,9 @@ namespace TankTrouble
 
 	LRESULT CALLBACK StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK SingleGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-	
+	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	LRESULT CALLBACK CAMPAIGNWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
 	void buttonInit(HWND hwnd);
 	void paint(HWND hwnd);
 	void keyDown(HWND hwnd, WPARAM wParam);

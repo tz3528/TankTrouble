@@ -54,11 +54,33 @@ namespace TankTrouble
 		{
 		case WM_CREATE:
 			buttonInit(hwnd);
-		case WM_KEYDOWN:
 			break;
-		case WM_KEYUP:
-			break;
-		case WM_PAINT:
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+			case SINGLE_GAME:
+				ShowWindow(hwndButtonSingleGame, SW_HIDE);
+				ShowWindow(hwndButtonOnlineGame, SW_HIDE);
+				ShowWindow(hwndButtonCampaign  , SW_HIDE);
+				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
+				InvalidateRect(hwnd, nullptr, TRUE);
+
+				break;
+			case ONLINE_GAME:
+				ShowWindow(hwndButtonSingleGame, SW_HIDE);
+				ShowWindow(hwndButtonOnlineGame, SW_HIDE);
+				ShowWindow(hwndButtonCampaign, SW_HIDE);
+				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
+				InvalidateRect(hwnd, nullptr, TRUE);
+				break;
+			case CAMPAIGN:
+				ShowWindow(hwndButtonSingleGame, SW_HIDE);
+				ShowWindow(hwndButtonOnlineGame, SW_HIDE);
+				ShowWindow(hwndButtonCampaign, SW_HIDE);
+				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CAMPAIGNWndProc);
+				InvalidateRect(hwnd, nullptr, TRUE);
+				break;
+			}
 			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -70,6 +92,58 @@ namespace TankTrouble
 	}
 
 	LRESULT CALLBACK SingleGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		switch (message)
+		{
+		case WM_KEYDOWN:
+			keyDown(hwnd, wParam);
+			break;
+		case WM_KEYUP:
+			keyUp(hwnd, wParam);
+			break;
+		case WM_PAINT:
+			paint(hwnd);
+			break;
+		case WM_ERASEBKGND:
+		{
+			return 1; // 告诉Windows消息已经被处理
+		}
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hwnd, message, wParam, lParam);
+		}
+		return 0;
+	}
+
+	LRESULT OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		switch (message)
+		{
+		case WM_KEYDOWN:
+			keyDown(hwnd, wParam);
+			break;
+		case WM_KEYUP:
+			keyUp(hwnd, wParam);
+			break;
+		case WM_PAINT:
+			paint(hwnd);
+			break;
+		case WM_ERASEBKGND:
+		{
+			return 1; // 告诉Windows消息已经被处理
+		}
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hwnd, message, wParam, lParam);
+		}
+		return 0;
+	}
+
+	LRESULT CAMPAIGNWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (message)
 		{
@@ -112,7 +186,7 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + ButtonHeight / 2 + ButtonGap,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)ONLINE_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),  // 实例句柄
 			nullptr);
 
@@ -122,7 +196,7 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + 3 * ButtonHeight / 2 + 2 * ButtonGap,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),  // 实例句柄
 			nullptr);
 
@@ -281,6 +355,9 @@ namespace TankTrouble
 
 		std::thread bulletThread(bulletPoolUpdate);
 		std::thread tankThread(TankControl);
+
+		bulletThread.detach();
+        tankThread.detach();
 
 		while (true) {
 			if (PeekMessage(&message, nullptr, 0, 0, PM_NOREMOVE)) {
