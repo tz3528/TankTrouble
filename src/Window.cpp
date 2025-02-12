@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <iostream>
 #include <vector>
+#include <commctrl.h>
 
 using std::cout, std::endl, std::make_shared;
 
@@ -46,7 +47,29 @@ namespace TankTrouble
 		);
 	}
 
-	LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+
+	LRESULT StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		switch (message)
+		{
+		case WM_CREATE:
+			buttonInit(hwnd);
+		case WM_KEYDOWN:
+			break;
+		case WM_KEYUP:
+			break;
+		case WM_PAINT:
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hwnd, message, wParam, lParam);
+		}
+		return 0;
+	}
+
+	LRESULT CALLBACK SingleGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (message)
 		{
@@ -70,6 +93,39 @@ namespace TankTrouble
 			return DefWindowProc(hwnd, message, wParam, lParam);
 		}
 		return 0;
+	}
+
+	void buttonInit(HWND hwnd) {
+		hwndButtonSingleGame = CreateWindow(
+			L"BUTTON",  // 按钮类名
+			L"单机游戏",  // 按钮文本
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
+			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 - ButtonHeight / 2,
+			ButtonWidth, ButtonHeight,
+			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),  // 实例句柄
+			nullptr);
+
+		hwndButtonOnlineGame = CreateWindow(
+			L"BUTTON",  // 按钮类名
+			L"在线对战",  // 按钮文本
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
+			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + ButtonHeight / 2 + ButtonGap,
+			ButtonWidth, ButtonHeight,
+			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),  // 实例句柄
+			nullptr);
+
+		hwndButtonCampaign = CreateWindow(
+			L"BUTTON",  // 按钮类名
+			L"战役",  // 按钮文本
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
+			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + 3 * ButtonHeight / 2 + 2 * ButtonGap,
+			ButtonWidth, ButtonHeight,
+			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),  // 实例句柄
+			nullptr);
+
 	}
 
 	void paint(HWND hwnd) {
@@ -187,7 +243,7 @@ namespace TankTrouble
 		WNDCLASSEX wc = { 0 };
 		wc.cbSize = sizeof(wc);
 		wc.style = CS_OWNDC;
-		wc.lpfnWndProc = WndProc;
+		wc.lpfnWndProc = StartWndProc;
 		wc.cbClsExtra = 0;
 		wc.cbWndExtra = 0;
 		wc.hInstance = hInstance;

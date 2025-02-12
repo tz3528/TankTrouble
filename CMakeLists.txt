@@ -60,3 +60,7 @@ target_link_libraries(TankTrouble ${D3D12_LIBRARY} ${DXGI_LIBRARY} ${D3DCOMPILER
 
 # Á´½Ó EasyX ¿â
 # target_link_libraries(TankTrouble EasyXa)
+
+
+# Á´½Ó Windows ¿â
+target_link_libraries(TankTrouble gdi32 user32 kernel32)
