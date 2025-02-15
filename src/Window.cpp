@@ -26,37 +26,10 @@ namespace TankTrouble
 
 	int LeftWall, RightWall, UpWall, BottomWall;
 
-	void init(HWND hwnd) {
-
-		LeftWall = 8;
-		RightWall = WindowWidth - 24;
-		UpWall = 8;
-		BottomWall = WindowHeight - 48;
-
-		buttonInit(hwnd);
-
-		WallPool.push_back(make_shared<Wall>
-			(point{ LeftWall ,UpWall }, point{ LeftWall,BottomWall }, 1)
-		);
-		WallPool.push_back(make_shared<Wall>
-			(point{ RightWall ,UpWall }, point{ RightWall,BottomWall }, 1)
-		);
-		WallPool.push_back(make_shared<Wall>
-			(point{ LeftWall ,UpWall }, point{ RightWall,UpWall }, 1)
-		);
-		WallPool.push_back(make_shared<Wall>
-			(point{ LeftWall ,BottomWall }, point{ RightWall,BottomWall }, 1)
-		);
-	}
-
-
 	LRESULT CALLBACK StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (message)
 		{
-		case WM_CREATE:
-			buttonInit(hwnd);
-			break;
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{
@@ -66,7 +39,7 @@ namespace TankTrouble
 				ShowWindow(hwndButtonCampaign  , SW_HIDE);
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
 				InvalidateRect(hwnd, nullptr, TRUE);
-
+				gameInit(hwnd);
 				break;
 			case ONLINE_GAME:
 				ShowWindow(hwndButtonSingleGame, SW_HIDE);
@@ -171,6 +144,17 @@ namespace TankTrouble
 		return 0;
 	}
 
+	void init(HWND hwnd) {
+
+		LeftWall = 8;
+		RightWall = WindowWidth - 24;
+		UpWall = 8;
+		BottomWall = WindowHeight - 48;
+
+		buttonInit(hwnd);
+
+	}
+
 	void buttonInit(HWND hwnd) {
 		hwndButtonSingleGame = CreateWindow(
 			L"BUTTON",  // 按钮类名
@@ -229,6 +213,22 @@ namespace TankTrouble
 		//ShowWindow(hwndButtonBeginGame, SW_HIDE);
 		//ShowWindow(hwndButtonBack, SW_HIDE);
 
+	}
+
+	void gameInit(HWND hwnd){
+		//创建地图边缘的墙
+		WallPool.push_back(make_shared<Wall>
+			(point{ LeftWall ,UpWall }, point{ LeftWall,BottomWall }, MapSize)
+		);
+		WallPool.push_back(make_shared<Wall>
+			(point{ RightWall ,UpWall }, point{ RightWall,BottomWall }, MapSize)
+		);
+		WallPool.push_back(make_shared<Wall>
+			(point{ LeftWall ,UpWall }, point{ RightWall,UpWall }, MapSize)
+		);
+		WallPool.push_back(make_shared<Wall>
+			(point{ LeftWall ,BottomWall }, point{ RightWall,BottomWall }, MapSize)
+		);
 	}
 
 	void paint(HWND hwnd) {
@@ -369,7 +369,7 @@ namespace TankTrouble
 		init(hwnd);
 
 		TankPool.emplace_back(std::make_shared<Tank>(0, 0, point(2 * WindowWidth / 20, 2 * WindowHeight / 20),
-			point(1, 0), 1, RED));
+			point(1, 0), MapSize, RED));
 
 		//show the window
 		ShowWindow(hwnd, SW_SHOW);
