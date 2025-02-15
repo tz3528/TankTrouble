@@ -26,12 +26,14 @@ namespace TankTrouble
 
 	int LeftWall, RightWall, UpWall, BottomWall;
 
-	void init() {
+	void init(HWND hwnd) {
 
 		LeftWall = 8;
 		RightWall = WindowWidth - 24;
 		UpWall = 8;
 		BottomWall = WindowHeight - 48;
+
+		buttonInit(hwnd);
 
 		WallPool.push_back(make_shared<Wall>
 			(point{ LeftWall ,UpWall }, point{ LeftWall,BottomWall }, 1)
@@ -48,7 +50,7 @@ namespace TankTrouble
 	}
 
 
-	LRESULT StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (message)
 		{
@@ -117,7 +119,7 @@ namespace TankTrouble
 		return 0;
 	}
 
-	LRESULT OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (message)
 		{
@@ -143,7 +145,7 @@ namespace TankTrouble
 		return 0;
 	}
 
-	LRESULT CAMPAIGNWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK CAMPAIGNWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (message)
 		{
@@ -177,8 +179,8 @@ namespace TankTrouble
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 - ButtonHeight / 2,
 			ButtonWidth, ButtonHeight,
 			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
-			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),  // 实例句柄
-			nullptr);
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
+		);
 
 		hwndButtonOnlineGame = CreateWindow(
 			L"BUTTON",  // 按钮类名
@@ -187,8 +189,8 @@ namespace TankTrouble
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + ButtonHeight / 2 + ButtonGap,
 			ButtonWidth, ButtonHeight,
 			hwnd, (HMENU)ONLINE_GAME,  // 父窗口句柄,按钮ID
-			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),  // 实例句柄
-			nullptr);
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
+		);
 
 		hwndButtonCampaign = CreateWindow(
 			L"BUTTON",  // 按钮类名
@@ -197,8 +199,35 @@ namespace TankTrouble
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + 3 * ButtonHeight / 2 + 2 * ButtonGap,
 			ButtonWidth, ButtonHeight,
 			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
-			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),  // 实例句柄
-			nullptr);
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
+		);
+
+		ShowWindow(hwndButtonSingleGame, SW_HIDE);
+        ShowWindow(hwndButtonOnlineGame, SW_HIDE);
+        ShowWindow(hwndButtonCampaign, SW_HIDE);
+
+		hwndButtonBeginGame = CreateWindow(
+			L"BUTTON",  // 按钮类名
+			L"开始游戏",  // 按钮文本
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
+			WindowWidth / 4 - ButtonWidth / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
+			ButtonWidth, ButtonHeight,
+			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
+		);
+
+		hwndButtonBack = CreateWindow(
+			L"BUTTON",  // 按钮类名
+			L"返回",  // 按钮文本
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
+			3 * WindowWidth / 4 - ButtonWidth / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
+			ButtonWidth, ButtonHeight,
+			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
+		);
+
+		//ShowWindow(hwndButtonBeginGame, SW_HIDE);
+		//ShowWindow(hwndButtonBack, SW_HIDE);
 
 	}
 
@@ -309,7 +338,7 @@ namespace TankTrouble
 		LPSTR lpCmdLine,
 		int nCmdShow)
 	{
-		init();
+		
 
 		auto const pClassName = L"TankTrouble";
 
@@ -336,6 +365,8 @@ namespace TankTrouble
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			WindowWidth, WindowHeight,
 			nullptr, nullptr, hInstance, nullptr);
+
+		init(hwnd);
 
 		TankPool.emplace_back(std::make_shared<Tank>(0, 0, point(2 * WindowWidth / 20, 2 * WindowHeight / 20),
 			point(1, 0), 1, RED));

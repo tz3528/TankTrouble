@@ -32,10 +32,12 @@ namespace TankTrouble
 	static HWND hwndButtonSingleGame;
     static HWND hwndButtonOnlineGame;
     static HWND hwndButtonCampaign;
+	static HWND hwndButtonBeginGame;
+    static HWND hwndButtonBack;
 
 	//int GameMode = 0;
 
-	void init();
+	void init(HWND hwnd);
 	int start(
 		HINSTANCE hInstance,
 		HINSTANCE hPrevInstance,
