@@ -30,33 +30,10 @@ namespace TankTrouble
 	{
 		switch (message)
 		{
-		case WM_COMMAND:
-			switch (LOWORD(wParam))
-			{
-			case SINGLE_GAME:
-				ShowWindow(hwndButtonSingleGame, SW_HIDE);
-				ShowWindow(hwndButtonOnlineGame, SW_HIDE);
-				ShowWindow(hwndButtonCampaign  , SW_HIDE);
-				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
-				InvalidateRect(hwnd, nullptr, TRUE);
-				gameInit(hwnd);
-				break;
-			case ONLINE_GAME:
-				ShowWindow(hwndButtonSingleGame, SW_HIDE);
-				ShowWindow(hwndButtonOnlineGame, SW_HIDE);
-				ShowWindow(hwndButtonCampaign, SW_HIDE);
-				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
-				InvalidateRect(hwnd, nullptr, TRUE);
-				break;
-			case CAMPAIGN:
-				ShowWindow(hwndButtonSingleGame, SW_HIDE);
-				ShowWindow(hwndButtonOnlineGame, SW_HIDE);
-				ShowWindow(hwndButtonCampaign, SW_HIDE);
-				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CAMPAIGNWndProc);
-				InvalidateRect(hwnd, nullptr, TRUE);
-				break;
-			}
+		case WM_COMMAND: {
+			buttonDown(hwnd, wParam);
 			break;
+		}
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
@@ -162,9 +139,10 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 - ButtonHeight / 2,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)(SINGLE_GAME),  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
 		);
+
 
 		hwndButtonOnlineGame = CreateWindow(
 			L"BUTTON",  // 按钮类名
@@ -172,7 +150,7 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + ButtonHeight / 2 + ButtonGap,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)ONLINE_GAME,  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)(ONLINE_GAME),  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
 
@@ -182,21 +160,21 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + 3 * ButtonHeight / 2 + 2 * ButtonGap,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)(CAMPAIGN),  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
 
-		ShowWindow(hwndButtonSingleGame, SW_HIDE);
-        ShowWindow(hwndButtonOnlineGame, SW_HIDE);
-        ShowWindow(hwndButtonCampaign, SW_HIDE);
+		//ShowWindow(hwndButtonSingleGame, SW_HIDE);
+        //ShowWindow(hwndButtonOnlineGame, SW_HIDE);
+        //ShowWindow(hwndButtonCampaign, SW_HIDE);
 
 		hwndButtonBeginGame = CreateWindow(
 			L"BUTTON",  // 按钮类名
 			L"开始游戏",  // 按钮文本
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
-			WindowWidth / 4 - ButtonWidth / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
+			WindowWidth / 2 - ButtonWidth - ButtonGap / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)(BEGIN_GAME),  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
 
@@ -204,18 +182,77 @@ namespace TankTrouble
 			L"BUTTON",  // 按钮类名
 			L"返回",  // 按钮文本
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
-			3 * WindowWidth / 4 - ButtonWidth / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
+			WindowWidth / 2 + ButtonGap / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)(BACK),  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
 		);
 
-		//ShowWindow(hwndButtonBeginGame, SW_HIDE);
-		//ShowWindow(hwndButtonBack, SW_HIDE);
+		ShowWindow(hwndButtonBeginGame, SW_HIDE);
+		ShowWindow(hwndButtonBack, SW_HIDE);
 
 	}
 
-	void gameInit(HWND hwnd){
+	void buttonDown(HWND hwnd, WPARAM wParam){
+		char tmp[256] = { 0 };
+		
+		//用于判断是否选择了游戏模式
+		switch (LOWORD(wParam))
+		{
+		case SINGLE_GAME:
+			GameMode = SINGLE_GAME;
+			break;
+		case ONLINE_GAME:
+			GameMode = ONLINE_GAME;
+			break;
+		case CAMPAIGN:
+			GameMode = CAMPAIGN;
+			break;
+		case BEGIN_GAME:
+			sprintf_s(tmp, sizeof(tmp), "%d %d\n", LOWORD(wParam), BEGIN_GAME);
+			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
+            ShowWindow(hwndButtonBeginGame, SW_HIDE);
+            ShowWindow(hwndButtonBack, SW_HIDE);
+            UpdateWindow(hwndButtonBeginGame);
+            UpdateWindow(hwndButtonBack);
+			switch (GameMode) 
+			{
+			case NOSELECT:
+				break;
+			case SINGLE_GAME:
+				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
+				break;
+			case ONLINE_GAME:
+				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
+				break;
+			case CAMPAIGN:
+				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CAMPAIGNWndProc);
+				break;
+			}
+			
+			InvalidateRect(hwnd, nullptr, TRUE);
+			return ;
+		case BACK:
+			repickMode(hwnd);
+			InvalidateRect(hwnd, nullptr, TRUE);
+			return ;
+		}
+		if (GameMode != NOSELECT) {
+			selectGameMode(hwnd);
+		}
+	}
+
+	void selectGameMode(HWND hwnd) {
+
+		ShowWindow(hwndButtonSingleGame, SW_HIDE);
+		ShowWindow(hwndButtonOnlineGame, SW_HIDE);
+		ShowWindow(hwndButtonCampaign, SW_HIDE);
+		
+		InvalidateRect(hwnd, nullptr, TRUE);
+
+		ShowWindow(hwndButtonBeginGame, SW_SHOW);
+        ShowWindow(hwndButtonBack, SW_SHOW);
+
 		//创建地图边缘的墙
 		WallPool.push_back(make_shared<Wall>
 			(point{ LeftWall ,UpWall }, point{ LeftWall,BottomWall }, MapSize)
@@ -229,6 +266,19 @@ namespace TankTrouble
 		WallPool.push_back(make_shared<Wall>
 			(point{ LeftWall ,BottomWall }, point{ RightWall,BottomWall }, MapSize)
 		);
+	}
+
+	void repickMode(HWND hwnd){
+		GameMode = NOSELECT;
+
+		ShowWindow(hwndButtonSingleGame, SW_SHOW);
+		ShowWindow(hwndButtonOnlineGame, SW_SHOW);
+		ShowWindow(hwndButtonCampaign, SW_SHOW);
+
+		InvalidateRect(hwnd, nullptr, TRUE);
+
+		ShowWindow(hwndButtonBeginGame, SW_HIDE);
+		ShowWindow(hwndButtonBack, SW_HIDE);
 	}
 
 	void paint(HWND hwnd) {
@@ -378,8 +428,8 @@ namespace TankTrouble
 
 		MSG message;
 
-		//AllocConsole();
-		//g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		AllocConsole();
+		g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		//char tmp[256] = { 0 };
 		//sprintf_s(tmp, sizeof(tmp), "%d %d %d %d\n", LeftWall, RightWall, UpWall, BottomWall);
 		//WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);

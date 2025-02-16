@@ -39,7 +39,7 @@ namespace TankTrouble
         bool isAttack = false;
 
     private:
-        int id, size, bullets = 20;
+        int id, size, bullets = 15;
         int controller;
         double movingStep, length, width;
         point tmpPosition, tmpDirection;

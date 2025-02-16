@@ -47,10 +47,10 @@ namespace TankTrouble {
 		body[1] = position + direction * length / 2 - direction.normalVector() * width / 2;
 		body[2] = position - direction * length / 2 - direction.normalVector() * width / 2;
 		body[3] = position - direction * length / 2 + direction.normalVector() * width / 2;
-		barrel[0] = position + direction * length * 3 / 4 + direction.normalVector() * width / 4;
-		barrel[1] = position + direction * length * 3 / 4 - direction.normalVector() * width / 4;
-		barrel[2] = position - direction * length / 6 - direction.normalVector() * width / 4;
-		barrel[3] = position - direction * length / 6 + direction.normalVector() * width / 4;
+		barrel[0] = position + direction * length * 3 / 4 + direction.normalVector() * width / 6;
+		barrel[1] = position + direction * length * 3 / 4 - direction.normalVector() * width / 6;
+		barrel[2] = position - direction * length / 6 - direction.normalVector() * width / 6;
+		barrel[3] = position - direction * length / 6 + direction.normalVector() * width / 6;
 	}
 
 	void Tank::forward() {

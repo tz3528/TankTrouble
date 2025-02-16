@@ -28,15 +28,15 @@ namespace TankTrouble {
 		this->life = 800;
 
 		if (size == 1) {
-			this->radius = WindowWidth / 120.0;
+			this->radius = 8;
 			this->movingStep = SMALL_MAP_STEP;
 		}
 		if (size == 2) {
-			this->radius = WindowWidth / 160.0;
+			this->radius = 4;
 			this->movingStep = MID_MAP_STEP;
 		}
 		if (size == 3) {
-			this->radius = WindowWidth / 200.0;
+			this->radius = 2;
 			this->movingStep = BIG_MAP_STEP;
 		}
 
