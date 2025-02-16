@@ -4,6 +4,7 @@
 #include "bullet.h"
 #include "Wall.h"
 #include "Tank.h"
+#include "Win32Controls.h"
 
 #include <graphics.h>
 #include <windows.h>
@@ -139,10 +140,9 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 - ButtonHeight / 2,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)(SINGLE_GAME),  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
 		);
-
 
 		hwndButtonOnlineGame = CreateWindow(
 			L"BUTTON",  // 按钮类名
@@ -150,7 +150,7 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + ButtonHeight / 2 + ButtonGap,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)(ONLINE_GAME),  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)ONLINE_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
 
@@ -160,7 +160,7 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + 3 * ButtonHeight / 2 + 2 * ButtonGap,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)(CAMPAIGN),  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
 
@@ -174,7 +174,7 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 - ButtonWidth - ButtonGap / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)(BEGIN_GAME),  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)BEGIN_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
 
@@ -184,7 +184,7 @@ namespace TankTrouble
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
 			WindowWidth / 2 + ButtonGap / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
 			ButtonWidth, ButtonHeight,
-			hwnd, (HMENU)(BACK),  // 父窗口句柄,按钮ID
+			hwnd, (HMENU)BACK,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
 		);
 
@@ -193,9 +193,28 @@ namespace TankTrouble
 
 	}
 
+	void radioButtonInit(HWND hwnd){
+		//玩家数量信息
+        ControlsInfo PlayerNumberInfo[MAX_PLAYER_NUMBER] = {
+            {ONE_PLAYER, L"1"},
+            {TWO_PLAYER, L"2"},
+            {THREE_PLAYER, L"3"},
+            {FOUR_PLAYER, L"4"},
+        };
+
+		HWND* radioGroupNumber = new HWND[MAX_PLAYER_NUMBER];
+		CreateRadioGroupHorizontal(
+			hwnd, 300, 100, ButtonWidth, ButtonHeight,
+			MAX_PLAYER_NUMBER, PlayerNumberInfo, radioGroupNumber
+		);
+
+		for (int i = 0;i < 4;i++) {
+			ShowWindow(radioGroupNumber[i], SW_HIDE);
+		}
+
+	}
+
 	void buttonDown(HWND hwnd, WPARAM wParam){
-		char tmp[256] = { 0 };
-		
 		//用于判断是否选择了游戏模式
 		switch (LOWORD(wParam))
 		{
@@ -209,8 +228,6 @@ namespace TankTrouble
 			GameMode = CAMPAIGN;
 			break;
 		case BEGIN_GAME:
-			sprintf_s(tmp, sizeof(tmp), "%d %d\n", LOWORD(wParam), BEGIN_GAME);
-			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
             ShowWindow(hwndButtonBeginGame, SW_HIDE);
             ShowWindow(hwndButtonBack, SW_HIDE);
             UpdateWindow(hwndButtonBeginGame);
@@ -389,7 +406,6 @@ namespace TankTrouble
 		int nCmdShow)
 	{
 		
-
 		auto const pClassName = L"TankTrouble";
 
 		// register window C lass
@@ -428,8 +444,8 @@ namespace TankTrouble
 
 		MSG message;
 
-		AllocConsole();
-		g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		//AllocConsole();
+		//g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		//char tmp[256] = { 0 };
 		//sprintf_s(tmp, sizeof(tmp), "%d %d %d %d\n", LeftWall, RightWall, UpWall, BottomWall);
 		//WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
@@ -455,6 +471,25 @@ namespace TankTrouble
 			}
 
 		}
+
+		// 释放资源
+		for (auto& tank : TankPool) {
+			tank.reset();
+		}
+		TankPool.clear();
+
+		for (auto& bullet : bulletPool) {
+			bullet.reset();
+		}
+		bulletPool.clear();
+
+		for (auto& wall : WallPool) {
+			wall.reset();
+		}
+		WallPool.clear();
+
+		// 销毁窗口
+		DestroyWindow(hwnd);
 
 		return 0;
 

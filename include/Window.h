@@ -12,28 +12,38 @@ using Microsoft::WRL::ComPtr;
 
 namespace TankTrouble
 {
+
 //按钮的起始编号
-#define BUTTON_BEGIN	0x2000
+#define BUTTON_BEGIN		0x2000
+#define PLAYER_NUMBER		0x2100
 
 //按钮编号的宏定义
-#define NOSELECT		BUTTON_BEGIN + 0
-#define SINGLE_GAME		BUTTON_BEGIN + 1
-#define ONLINE_GAME		BUTTON_BEGIN + 2
-#define CAMPAIGN		BUTTON_BEGIN + 3
-#define BEGIN_GAME		BUTTON_BEGIN + 4
-#define BACK			BUTTON_BEGIN + 5
+#define NOSELECT			(BUTTON_BEGIN + 0)
+#define SINGLE_GAME			(BUTTON_BEGIN + 1)
+#define ONLINE_GAME			(BUTTON_BEGIN + 2)
+#define CAMPAIGN			(BUTTON_BEGIN + 3)
+#define BEGIN_GAME			(BUTTON_BEGIN + 4)
+#define BACK				(BUTTON_BEGIN + 5)
 
 //地图大小的宏定义
-#define SMALL_MAP		1
-#define MEDIUM_MAP		2
-#define LARGE_MAP		3
+#define SMALL_MAP			1
+#define MEDIUM_MAP			2
+#define LARGE_MAP			3
 
+//玩家数的宏定义
+#define MAX_PLAYER_NUMBER	4
+#define ONE_PLAYER			(PLAYER_NUMBER + 1)
+#define TWO_PLAYER			(PLAYER_NUMBER + 2)
+#define THREE_PLAYER		(PLAYER_NUMBER + 3)
+#define FOUR_PLAYER			(PLAYER_NUMBER + 4)
+#define FIVE_PLAYER			(PLAYER_NUMBER + 5)
+#define SIX_PLAYER			(PLAYER_NUMBER + 6)
+#define SEVEN_PLAYER		(PLAYER_NUMBER + 7)
+#define EIGHT_PLAYER		(PLAYER_NUMBER + 8)
 
 	static int WindowWidth = 1280;
 	static int WindowHeight = 720;
-	static int ButtonWidth = 300;
-    static int ButtonHeight = 60;
-	static int ButtonGap = 20;
+	
 
 	//边缘四面墙的坐标
 	extern int LeftWall, RightWall, UpWall, BottomWall;
@@ -43,13 +53,6 @@ namespace TankTrouble
 
 	static int MapSize = 1;
 	static int GameMode = NOSELECT;
-
-	//按钮
-	static HWND hwndButtonSingleGame;
-    static HWND hwndButtonOnlineGame;
-    static HWND hwndButtonCampaign;
-	static HWND hwndButtonBeginGame;
-    static HWND hwndButtonBack;
 	
 	int start(
 		HINSTANCE hInstance,
@@ -64,6 +67,7 @@ namespace TankTrouble
 
 	void init(HWND hwnd);
 	void buttonInit(HWND hwnd);
+	void radioButtonInit(HWND hwnd);
 
 	void buttonDown(HWND hwnd, WPARAM wParam);
 	void selectGameMode(HWND hwnd);
