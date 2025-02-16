@@ -31,7 +31,7 @@ namespace TankTrouble
 #define LARGE_MAP			3
 
 //玩家数的宏定义
-#define MAX_PLAYER_NUMBER	4
+#define MAX_PLAYER	4
 #define ONE_PLAYER			(PLAYER_NUMBER + 1)
 #define TWO_PLAYER			(PLAYER_NUMBER + 2)
 #define THREE_PLAYER		(PLAYER_NUMBER + 3)
@@ -43,7 +43,6 @@ namespace TankTrouble
 
 	static int WindowWidth = 1280;
 	static int WindowHeight = 720;
-	
 
 	//边缘四面墙的坐标
 	extern int LeftWall, RightWall, UpWall, BottomWall;

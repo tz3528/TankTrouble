@@ -11,8 +11,10 @@ namespace TankTrouble {
 		wchar_t* text;
 	};
 
-	static int ButtonWidth = 300;
-    static int ButtonHeight = 60;
+	static int PushButtonWidth = 300;
+    static int PushButtonHeight = 80;
+	static int RadioButtonWidth = 150;
+    static int RadioButtonHeight = 60;
 	static int ButtonGap = 20;
 
 	//°´Å¥

@@ -11,7 +11,7 @@ namespace TankTrouble {
 				L"BUTTON",  // 按钮类名
 				info[i].text,  // 按钮文本
 				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // 按钮样式
-				x + ButtonWidth * i + ButtonGap * i, y,
+				x + RadioButtonWidth * i + ButtonGap * i, y,
 				width, height,
 				hwnd, (HMENU)(info[i].id),  // 父窗口句柄,按钮ID
 				(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
@@ -29,7 +29,7 @@ namespace TankTrouble {
 				L"BUTTON",  // 按钮类名
 				info[i].text,  // 按钮文本
 				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // 按钮样式
-				x, y + ButtonHeight * i + ButtonGap * i,
+				x, y + RadioButtonHeight * i + ButtonGap * i,
 				width, height,
 				hwnd, (HMENU)(info[i].id),  // 父窗口句柄,按钮ID
 				(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr

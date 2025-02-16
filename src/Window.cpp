@@ -130,6 +130,7 @@ namespace TankTrouble
 		BottomWall = WindowHeight - 48;
 
 		buttonInit(hwnd);
+		radioButtonInit(hwnd);
 
 	}
 
@@ -138,8 +139,8 @@ namespace TankTrouble
 			L"BUTTON",  // 按钮类名
 			L"单机游戏",  // 按钮文本
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
-			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 - ButtonHeight / 2,
-			ButtonWidth, ButtonHeight,
+			WindowWidth / 2 - PushButtonWidth / 2, WindowHeight / 5 - PushButtonHeight / 2,
+			PushButtonWidth, PushButtonHeight,
 			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
 		);
@@ -148,8 +149,8 @@ namespace TankTrouble
 			L"BUTTON",  // 按钮类名
 			L"在线对战",  // 按钮文本
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
-			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + ButtonHeight / 2 + ButtonGap,
-			ButtonWidth, ButtonHeight,
+			WindowWidth / 2 - PushButtonWidth / 2, WindowHeight / 5 + PushButtonHeight / 2 + ButtonGap,
+			PushButtonWidth, PushButtonHeight,
 			hwnd, (HMENU)ONLINE_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
@@ -158,8 +159,8 @@ namespace TankTrouble
 			L"BUTTON",  // 按钮类名
 			L"战役",  // 按钮文本
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
-			WindowWidth / 2 - ButtonWidth / 2, WindowHeight / 5 + 3 * ButtonHeight / 2 + 2 * ButtonGap,
-			ButtonWidth, ButtonHeight,
+			WindowWidth / 2 - PushButtonWidth / 2, WindowHeight / 5 + 3 * PushButtonHeight / 2 + 2 * ButtonGap,
+			PushButtonWidth, PushButtonHeight,
 			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
@@ -172,8 +173,8 @@ namespace TankTrouble
 			L"BUTTON",  // 按钮类名
 			L"开始游戏",  // 按钮文本
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
-			WindowWidth / 2 - ButtonWidth - ButtonGap / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
-			ButtonWidth, ButtonHeight,
+			WindowWidth / 2 - PushButtonWidth - ButtonGap / 2, 3 * WindowHeight / 4 - PushButtonHeight / 2,
+			PushButtonWidth, PushButtonHeight,
 			hwnd, (HMENU)BEGIN_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
@@ -182,8 +183,8 @@ namespace TankTrouble
 			L"BUTTON",  // 按钮类名
 			L"返回",  // 按钮文本
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // 按钮样式
-			WindowWidth / 2 + ButtonGap / 2, 3 * WindowHeight / 4 - ButtonHeight / 2,
-			ButtonWidth, ButtonHeight,
+			WindowWidth / 2 + ButtonGap / 2, 3 * WindowHeight / 4 - PushButtonHeight / 2,
+			PushButtonWidth, PushButtonHeight,
 			hwnd, (HMENU)BACK,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
 		);
@@ -195,21 +196,28 @@ namespace TankTrouble
 
 	void radioButtonInit(HWND hwnd){
 		//玩家数量信息
-        ControlsInfo PlayerNumberInfo[MAX_PLAYER_NUMBER] = {
+        ControlsInfo PlayerNumberInfo[MAX_PLAYER] = {
             {ONE_PLAYER, L"1"},
             {TWO_PLAYER, L"2"},
             {THREE_PLAYER, L"3"},
             {FOUR_PLAYER, L"4"},
         };
 
-		HWND* radioGroupNumber = new HWND[MAX_PLAYER_NUMBER];
+		HWND* radioGroupNumber = new HWND[MAX_PLAYER];
 		CreateRadioGroupHorizontal(
-			hwnd, 300, 100, ButtonWidth, ButtonHeight,
-			MAX_PLAYER_NUMBER, PlayerNumberInfo, radioGroupNumber
+			hwnd, 200, 100, RadioButtonWidth, RadioButtonHeight,
+			MAX_PLAYER, PlayerNumberInfo, radioGroupNumber
+		);
+		CheckRadioButton(
+			hwnd, 
+			PlayerNumberInfo[0].id, 
+			PlayerNumberInfo[MAX_PLAYER - 1].id,
+			PlayerNumberInfo[0].id
 		);
 
-		for (int i = 0;i < 4;i++) {
-			ShowWindow(radioGroupNumber[i], SW_HIDE);
+		for (int i = 0;i < MAX_PLAYER;i++) {
+			hwndRadioGroupPlayerNumber[i] = radioGroupNumber[i];
+			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
 		}
 
 	}
@@ -219,6 +227,9 @@ namespace TankTrouble
 		switch (LOWORD(wParam))
 		{
 		case SINGLE_GAME:
+			for (int i = 0;i < MAX_PLAYER;i++) {
+                ShowWindow(hwndRadioGroupPlayerNumber[i], SW_SHOW);
+			}
 			GameMode = SINGLE_GAME;
 			break;
 		case ONLINE_GAME:
