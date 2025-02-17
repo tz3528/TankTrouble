@@ -59,33 +59,33 @@ namespace TankTrouble {
 		return tmp;
 	}
 
-	long getMinX(const point* points, int n) {
-		long minx = points[0].x;
+	double getMinX(const point* points, int n) {
+		double minx = points[0].x;
 		for (int i = 1;i < n;i++) {
-			minx = min<long>(minx, points[i].x);
+			minx = min<double>(minx, points[i].x);
 		}
 		return minx;
 	}
-	long getMinY(const point* points, int n) {
-		long miny = points[0].y;
+	double getMinY(const point* points, int n) {
+		double miny = points[0].y;
 		for (int i = 1;i < n;i++) {
-			miny = min<long>(miny, points[i].y);
+			miny = min<double>(miny, points[i].y);
 		}
 		return miny;
 	}
 
-	long getMaxX(const point* points, int n) {
-		long maxx = points[0].x;
+	double getMaxX(const point* points, int n) {
+		double maxx = points[0].x;
 		for (int i = 1;i < n;i++) {
-			maxx = max<long>(maxx, points[i].x);
+			maxx = max<double>(maxx, points[i].x);
 		}
 		return maxx;
 	}
 
-	long getMaxY(const point* points, int n) {
-		long maxy = points[0].y;
+	double getMaxY(const point* points, int n) {
+		double maxy = points[0].y;
 		for (int i = 1;i < n;i++) {
-			maxy = max<long>(maxy, points[i].y);
+			maxy = max<double>(maxy, points[i].y);
 		}
 		return maxy;
 	}

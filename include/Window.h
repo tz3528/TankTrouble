@@ -1,6 +1,9 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "Win32Controls.h"
+
+#include <graphics.h>
 #include <mutex>
 #include <condition_variable>
 #include <d3d12.h>
@@ -13,33 +16,23 @@ using Microsoft::WRL::ComPtr;
 namespace TankTrouble
 {
 
-//按钮的起始编号
-#define BUTTON_BEGIN		0x2000
-#define PLAYER_NUMBER		0x2100
-
-//按钮编号的宏定义
-#define NOSELECT			(BUTTON_BEGIN + 0)
-#define SINGLE_GAME			(BUTTON_BEGIN + 1)
-#define ONLINE_GAME			(BUTTON_BEGIN + 2)
-#define CAMPAIGN			(BUTTON_BEGIN + 3)
-#define BEGIN_GAME			(BUTTON_BEGIN + 4)
-#define BACK				(BUTTON_BEGIN + 5)
+//玩家数的宏定义
+#define MAX_PLAYER			4
+#define NO_PLAYER			0x2100
+#define ONE_PLAYER			(NO_PLAYER + 1)
+#define TWO_PLAYER			(NO_PLAYER + 2)
+#define THREE_PLAYER		(NO_PLAYER + 3)
+#define FOUR_PLAYER			(NO_PLAYER + 4)
+#define FIVE_PLAYER			(NO_PLAYER + 5)
+#define SIX_PLAYER			(NO_PLAYER + 6)
+#define SEVEN_PLAYER		(NO_PLAYER + 7)
+#define EIGHT_PLAYER		(NO_PLAYER + 8)
 
 //地图大小的宏定义
-#define SMALL_MAP			1
-#define MEDIUM_MAP			2
-#define LARGE_MAP			3
+#define SMALL_MAP			(0x2200 + 1)
+#define MEDIUM_MAP			(0x2200 + 2)
+#define LARGE_MAP			(0x2200 + 3)
 
-//玩家数的宏定义
-#define MAX_PLAYER	4
-#define ONE_PLAYER			(PLAYER_NUMBER + 1)
-#define TWO_PLAYER			(PLAYER_NUMBER + 2)
-#define THREE_PLAYER		(PLAYER_NUMBER + 3)
-#define FOUR_PLAYER			(PLAYER_NUMBER + 4)
-#define FIVE_PLAYER			(PLAYER_NUMBER + 5)
-#define SIX_PLAYER			(PLAYER_NUMBER + 6)
-#define SEVEN_PLAYER		(PLAYER_NUMBER + 7)
-#define EIGHT_PLAYER		(PLAYER_NUMBER + 8)
 
 	static int WindowWidth = 1280;
 	static int WindowHeight = 720;
@@ -50,8 +43,10 @@ namespace TankTrouble
 	extern HDC hdcMem;
 	extern HBITMAP hbmMem;
 
-	static int MapSize = 1;
 	static int GameMode = NOSELECT;
+	static int MapSize = 1;
+	static int computers = 0;
+	COLORREF PlayerColor = RED;
 	
 	int start(
 		HINSTANCE hInstance,

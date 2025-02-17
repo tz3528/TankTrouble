@@ -4,9 +4,7 @@
 #include "bullet.h"
 #include "Wall.h"
 #include "Tank.h"
-#include "Win32Controls.h"
 
-#include <graphics.h>
 #include <windows.h>
 #include <iostream>
 #include <vector>
@@ -144,6 +142,7 @@ namespace TankTrouble
 			hwnd, (HMENU)SINGLE_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
 		);
+		SendMessage(hwndButtonSingleGame, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		hwndButtonOnlineGame = CreateWindow(
 			L"BUTTON",  // 按钮类名
@@ -154,6 +153,7 @@ namespace TankTrouble
 			hwnd, (HMENU)ONLINE_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
+		SendMessage(hwndButtonOnlineGame, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		hwndButtonCampaign = CreateWindow(
 			L"BUTTON",  // 按钮类名
@@ -164,6 +164,7 @@ namespace TankTrouble
 			hwnd, (HMENU)CAMPAIGN,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
+		SendMessage(hwndButtonCampaign, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		//ShowWindow(hwndButtonSingleGame, SW_HIDE);
         //ShowWindow(hwndButtonOnlineGame, SW_HIDE);
@@ -178,6 +179,7 @@ namespace TankTrouble
 			hwnd, (HMENU)BEGIN_GAME,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
 		);
+		SendMessage(hwndButtonBeginGame, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		hwndButtonBack = CreateWindow(
 			L"BUTTON",  // 按钮类名
@@ -188,6 +190,7 @@ namespace TankTrouble
 			hwnd, (HMENU)BACK,  // 父窗口句柄,按钮ID
 			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),nullptr
 		);
+		SendMessage(hwndButtonBack, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		ShowWindow(hwndButtonBeginGame, SW_HIDE);
 		ShowWindow(hwndButtonBack, SW_HIDE);
@@ -202,24 +205,85 @@ namespace TankTrouble
             {THREE_PLAYER, L"3"},
             {FOUR_PLAYER, L"4"},
         };
-
-		HWND* radioGroupNumber = new HWND[MAX_PLAYER];
+		/*单选按钮组的坐上顶点横坐标通过计算得出
+		* 这里的计算方式是
+		* left+(num*ButtonWidth + (num-1)*ButtonGap))/2= WindowWidth/2
+		*/
+		long groupLeft = (WindowWidth - MAX_PLAYER * RadioButtonWidth - (MAX_PLAYER - 1) * ButtonGap) / 2;
 		CreateRadioGroupHorizontal(
-			hwnd, 200, 100, RadioButtonWidth, RadioButtonHeight,
-			MAX_PLAYER, PlayerNumberInfo, radioGroupNumber
-		);
-		CheckRadioButton(
-			hwnd, 
-			PlayerNumberInfo[0].id, 
-			PlayerNumberInfo[MAX_PLAYER - 1].id,
-			PlayerNumberInfo[0].id
+			hwnd, groupLeft,100,
+			RadioButtonWidth, RadioButtonHeight,
+			MAX_PLAYER, PlayerNumberInfo, hwndRadioGroupPlayerNumber
 		);
 
-		for (int i = 0;i < MAX_PLAYER;i++) {
-			hwndRadioGroupPlayerNumber[i] = radioGroupNumber[i];
-			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
-		}
+		EditInfo PlayerNumberEditInfo = {
+			{PLAYER_NUMBER, L"人机数量"},
+			25 * wcslen(L"人机数量")
+		};
 
+		hwndEditPlayerNumber = CreateWindow(
+			L"EDIT", PlayerNumberEditInfo.ctrInfo.text,
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | ES_CENTER,
+			groupLeft - PlayerNumberEditInfo.Width - ButtonGap, 100 + 10,
+			PlayerNumberEditInfo.Width, EditHeight,
+			hwnd, (HMENU)PlayerNumberEditInfo.ctrInfo.id,
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
+		);
+		SendMessage(hwndEditPlayerNumber, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SendMessage(hwndEditPlayerNumber, EM_SETREADONLY, TRUE, 0);
+		ShowWindow(hwndEditPlayerNumber, SW_HIDE);
+
+		//地图大小
+		ControlsInfo MapInfo[3] = {
+			{SMALL_MAP, L"小"},
+			{MEDIUM_MAP, L"中"},
+            {LARGE_MAP, L"大"}
+		};
+		CreateRadioGroupHorizontal(
+			hwnd, groupLeft, 100 + RadioButtonHeight + ButtonGap,
+			RadioButtonWidth, RadioButtonHeight,
+			3, MapInfo, hwndRadioGroupMapType
+		);
+		EditInfo MapEditInfo = {
+			{MAP_TYPE, L"地图大小"},
+			25 * wcslen(L"地图大小")
+		};
+		hwndEditMapType = CreateWindow(
+			L"EDIT", MapEditInfo.ctrInfo.text,
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | ES_CENTER,
+			groupLeft - MapEditInfo.Width - ButtonGap, 100 + 10 + RadioButtonHeight + ButtonGap,
+			MapEditInfo.Width, EditHeight,
+			hwnd, (HMENU)MapEditInfo.ctrInfo.id,
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
+		);
+		SendMessage(hwndEditMapType, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SendMessage(hwndEditMapType, EM_SETREADONLY, TRUE, 0);
+		ShowWindow(hwndEditMapType, SW_HIDE);
+
+		//坦克颜色
+		ControlsInfo TankColorInfo[5] = {
+			{RED, L"红色"}, {BLUE, L"蓝色"}, {GREEN, L"绿色"}, {YELLOW, L"黄色"}, {BROWN, L"棕色"},
+		};
+		CreateRadioGroupHorizontal(
+			hwnd, groupLeft, 100 + 2 * (RadioButtonHeight + ButtonGap),
+			RadioButtonWidth, RadioButtonHeight,
+			5, TankColorInfo, hwndRadioGroupTankColor
+		);
+		EditInfo TankColorEditInfo = {
+			{TANK_COLOR, L"坦克颜色"},
+			25 * wcslen(L"坦克颜色")
+		};
+		hwndEditTankColor = CreateWindow(
+			L"EDIT", TankColorEditInfo.ctrInfo.text,
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | ES_CENTER,
+			groupLeft - TankColorEditInfo.Width - ButtonGap, 100 + 10 + 2 * (RadioButtonHeight + ButtonGap),
+			TankColorEditInfo.Width, EditHeight,
+			hwnd, (HMENU)TankColorEditInfo.ctrInfo.id,
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
+		);
+		SendMessage(hwndEditTankColor, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SendMessage(hwndEditTankColor, EM_SETREADONLY, TRUE, 0);
+		ShowWindow(hwndEditTankColor, SW_HIDE);
 	}
 
 	void buttonDown(HWND hwnd, WPARAM wParam){
@@ -230,6 +294,18 @@ namespace TankTrouble
 			for (int i = 0;i < MAX_PLAYER;i++) {
                 ShowWindow(hwndRadioGroupPlayerNumber[i], SW_SHOW);
 			}
+			ShowWindow(hwndEditPlayerNumber, SW_SHOW);
+
+			for (int i = 0;i < 3;i++) {
+				ShowWindow(hwndRadioGroupMapType[i], SW_SHOW);
+			}
+			ShowWindow(hwndEditMapType, SW_SHOW);
+
+			for (int i = 0;i < 5;i++) {
+				ShowWindow(hwndRadioGroupTankColor[i], SW_SHOW);
+			}
+			ShowWindow(hwndEditTankColor, SW_SHOW);
+
 			GameMode = SINGLE_GAME;
 			break;
 		case ONLINE_GAME:
@@ -243,6 +319,34 @@ namespace TankTrouble
             ShowWindow(hwndButtonBack, SW_HIDE);
             UpdateWindow(hwndButtonBeginGame);
             UpdateWindow(hwndButtonBack);
+
+			for (int i = 0;i < MAX_PLAYER;i++) {
+                ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
+				UpdateWindow(hwndRadioGroupPlayerNumber[i]);
+				if (SendMessage(hwndRadioGroupPlayerNumber[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+					computers = GetDlgCtrlID(hwndRadioGroupPlayerNumber[i]) - NO_PLAYER;
+				}
+			}
+			ShowWindow(hwndEditPlayerNumber, SW_HIDE);
+
+			for (int i = 0;i < 3;i++) {
+                ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
+                UpdateWindow(hwndRadioGroupMapType[i]);
+				if (SendMessage(hwndRadioGroupMapType[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+					MapSize = GetDlgCtrlID(hwndRadioGroupPlayerNumber[i]);
+				}
+			}
+			ShowWindow(hwndEditMapType, SW_HIDE);
+
+			for (int i = 0;i < 5;i++) {
+				ShowWindow(hwndRadioGroupTankColor[i], SW_HIDE);
+				UpdateWindow(hwndRadioGroupTankColor[i]);
+				if (SendMessage(hwndRadioGroupTankColor[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+					PlayerColor = GetDlgCtrlID(hwndRadioGroupTankColor[i]);
+				}
+			}
+			ShowWindow(hwndEditTankColor, SW_HIDE);
+
 			switch (GameMode) 
 			{
 			case NOSELECT:
@@ -307,6 +411,21 @@ namespace TankTrouble
 
 		ShowWindow(hwndButtonBeginGame, SW_HIDE);
 		ShowWindow(hwndButtonBack, SW_HIDE);
+
+		for (int i = 0;i < MAX_PLAYER;i++) {
+			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
+		}
+		ShowWindow(hwndEditPlayerNumber, SW_HIDE);
+
+		for (int i = 0;i < 3;i++) {
+			ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
+		}
+		ShowWindow(hwndEditMapType, SW_HIDE);
+
+		for (int i = 0;i < 5;i++) {
+            ShowWindow(hwndRadioGroupTankColor[i], SW_HIDE);
+		}
+		ShowWindow(hwndEditTankColor, SW_HIDE);
 	}
 
 	void paint(HWND hwnd) {

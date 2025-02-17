@@ -64,7 +64,7 @@ namespace TankTrouble {
 	}
 
 	void bullet::draw(HDC hdcMem) {
-		Ellipse(hdcMem, position.x - radius, position.y - radius, position.x + radius, position.y + radius);
+		Ellipse(hdcMem, (int)(position.x - radius), (int)(position.y - radius), (int)(position.x + radius), (int)(position.y + radius));
 	}
 
 	void bullet::move() {
