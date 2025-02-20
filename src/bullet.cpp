@@ -1,6 +1,6 @@
 #include "bullet.h"
 #include "Window.h"
-#include "Wall.h"
+#include "Map.h"
 #include "Tank.h"
 #include "point.h"
 

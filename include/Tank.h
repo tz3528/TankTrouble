@@ -47,6 +47,8 @@ namespace TankTrouble
         std::chrono::steady_clock::time_point lastAttack;
     };
 
+    static int RotationRatio = 30;
+
     extern std::list<std::shared_ptr<Tank>> TankPool;
 
     void TankControl();

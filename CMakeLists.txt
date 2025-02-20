@@ -24,8 +24,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(TankTrouble WIN32 ${MAIN_SRC})
 
-# Á´½Ó EasyX ¿â
-# target_link_libraries(TankTrouble EasyXa)
-
 # Á´½Ó Windows ¿â
 target_link_libraries(TankTrouble gdi32 user32 kernel32)

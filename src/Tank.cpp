@@ -1,13 +1,12 @@
 #include "Tank.h"
 #include "bullet.h"
 #include "Window.h"
-#include "Wall.h"
+#include "Map.h"
 #include "point.h"
 
 #include <graphics.h>
 #include <windows.h>
 #include <mmsystem.h>
-
 
 #pragma comment(lib, "Winmm.lib")
 
@@ -20,7 +19,7 @@ namespace TankTrouble {
 		this->id = id;
 		this->controller = controller;
 		this->size = size;
-		movingStep = 2;
+		movingStep = 3;
 
 		if (this->size == 1) {
 			length = 4 * WindowWidth / 60.0;
@@ -112,19 +111,19 @@ namespace TankTrouble {
 		point normalVector = direction.normalVector();
 		if ((direction ^ normalVector) > 0) {
 			if (isBackward) {
-				direction = direction - normalVector / 40;
+				direction = direction - normalVector / RotationRatio;
 			}
 			else {
-				direction = direction + normalVector / 40;
+				direction = direction + normalVector / RotationRatio;
 			}
 
 		}
 		else {
 			if (isBackward) {
-				direction = direction + normalVector / 40;
+				direction = direction + normalVector / RotationRatio;
 			}
 			else {
-				direction = direction - normalVector / 40;
+				direction = direction - normalVector / RotationRatio;
 			}
 		}
 		direction = direction / norm(direction);
@@ -217,8 +216,6 @@ namespace TankTrouble {
 	void Tank::setColor(COLORREF newColor) {
 		color = newColor;
 	}
-
-	ExMessage m = {};
 
 	void TankControl() {
 		while (1) {

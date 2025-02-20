@@ -6,8 +6,6 @@
 #include <graphics.h>
 #include <mutex>
 #include <condition_variable>
-#include <d3d12.h>
-#include <dxgi1_4.h>
 #include <wrl.h>
 #include <windows.h>
 
@@ -28,12 +26,6 @@ namespace TankTrouble
 #define SEVEN_PLAYER		(NO_PLAYER + 7)
 #define EIGHT_PLAYER		(NO_PLAYER + 8)
 
-//地图大小的宏定义
-#define SMALL_MAP			(0x2200 + 1)
-#define MEDIUM_MAP			(0x2200 + 2)
-#define LARGE_MAP			(0x2200 + 3)
-
-
 	static int WindowWidth = 1280;
 	static int WindowHeight = 720;
 
@@ -46,7 +38,7 @@ namespace TankTrouble
 	static int GameMode = NOSELECT;
 	static int MapSize = 1;
 	static int computers = 0;
-	COLORREF PlayerColor = RED;
+	static COLORREF PlayerColor = RED;
 	
 	int start(
 		HINSTANCE hInstance,

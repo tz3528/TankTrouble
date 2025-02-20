@@ -2,7 +2,7 @@
 
 #include "point.h"
 #include "bullet.h"
-#include "Wall.h"
+#include "Map.h"
 #include "Tank.h"
 
 #include <windows.h>
@@ -287,6 +287,7 @@ namespace TankTrouble
 	}
 
 	void buttonDown(HWND hwnd, WPARAM wParam){
+		char e[256] = { 0 };
 		//用于判断是否选择了游戏模式
 		switch (LOWORD(wParam))
 		{
@@ -333,7 +334,7 @@ namespace TankTrouble
                 ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
                 UpdateWindow(hwndRadioGroupMapType[i]);
 				if (SendMessage(hwndRadioGroupMapType[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-					MapSize = GetDlgCtrlID(hwndRadioGroupPlayerNumber[i]);
+					MapSize = GetDlgCtrlID(hwndRadioGroupMapType[i]);
 				}
 			}
 			ShowWindow(hwndEditMapType, SW_HIDE);
@@ -346,12 +347,16 @@ namespace TankTrouble
 				}
 			}
 			ShowWindow(hwndEditTankColor, SW_HIDE);
-
+			
+			sprintf_s(e, sizeof(e), "%d %d\n", MapSize, computers);
+			WriteConsoleA(g_hOutput, e, (DWORD)strlen(e), nullptr, nullptr);
 			switch (GameMode) 
 			{
 			case NOSELECT:
 				break;
 			case SINGLE_GAME:
+				WriteConsoleA(g_hOutput, e, (DWORD)strlen(e), nullptr, nullptr);
+				GenerateMap(MapSize);
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
 				break;
 			case ONLINE_GAME:
@@ -574,8 +579,8 @@ namespace TankTrouble
 
 		MSG message;
 
-		//AllocConsole();
-		//g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		AllocConsole();
+		g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		//char tmp[256] = { 0 };
 		//sprintf_s(tmp, sizeof(tmp), "%d %d %d %d\n", LeftWall, RightWall, UpWall, BottomWall);
 		//WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
