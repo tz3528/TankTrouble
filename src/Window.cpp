@@ -1,16 +1,14 @@
 #include "Window.h"
-
 #include "point.h"
 #include "bullet.h"
 #include "Map.h"
 #include "Tank.h"
+#include "SingleGame.h"
 
 #include <windows.h>
 #include <iostream>
 #include <vector>
 #include <commctrl.h>
-
-using std::cout, std::endl, std::make_shared;
 
 namespace TankTrouble
 {
@@ -32,32 +30,6 @@ namespace TankTrouble
 		case WM_COMMAND: {
 			buttonDown(hwnd, wParam);
 			break;
-		}
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hwnd, message, wParam, lParam);
-		}
-		return 0;
-	}
-
-	LRESULT CALLBACK SingleGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		switch (message)
-		{
-		case WM_KEYDOWN:
-			keyDown(hwnd, wParam);
-			break;
-		case WM_KEYUP:
-			keyUp(hwnd, wParam);
-			break;
-		case WM_PAINT:
-			paint(hwnd);
-			break;
-		case WM_ERASEBKGND:
-		{
-			return 1; // 告诉Windows消息已经被处理
 		}
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -166,10 +138,6 @@ namespace TankTrouble
 		);
 		SendMessage(hwndButtonCampaign, WM_SETFONT, (WPARAM)hFont, TRUE);
 
-		//ShowWindow(hwndButtonSingleGame, SW_HIDE);
-        //ShowWindow(hwndButtonOnlineGame, SW_HIDE);
-        //ShowWindow(hwndButtonCampaign, SW_HIDE);
-
 		hwndButtonBeginGame = CreateWindow(
 			L"BUTTON",  // 按钮类名
 			L"开始游戏",  // 按钮文本
@@ -194,7 +162,6 @@ namespace TankTrouble
 
 		ShowWindow(hwndButtonBeginGame, SW_HIDE);
 		ShowWindow(hwndButtonBack, SW_HIDE);
-
 	}
 
 	void radioButtonInit(HWND hwnd){
@@ -286,27 +253,76 @@ namespace TankTrouble
 		ShowWindow(hwndEditTankColor, SW_HIDE);
 	}
 
+	void menuShow(HWND hwnd) {
+		ShowWindow(hwndButtonSingleGame, SW_SHOW);
+		ShowWindow(hwndButtonOnlineGame, SW_SHOW);
+		ShowWindow(hwndButtonCampaign, SW_SHOW);
+	}
+
+	void menuHide(HWND hwnd) {
+		ShowWindow(hwndButtonSingleGame, SW_HIDE);
+		ShowWindow(hwndButtonOnlineGame, SW_HIDE);
+		ShowWindow(hwndButtonCampaign, SW_HIDE);
+	}
+
+	void selectionShow(HWND hwnd) {
+		for (int i = 0;i < MAX_PLAYER;i++) {
+			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_SHOW);
+		}
+		ShowWindow(hwndEditPlayerNumber, SW_SHOW);
+
+		for (int i = 0;i < 3;i++) {
+			ShowWindow(hwndRadioGroupMapType[i], SW_SHOW);
+		}
+		ShowWindow(hwndEditMapType, SW_SHOW);
+
+		for (int i = 0;i < 5;i++) {
+			ShowWindow(hwndRadioGroupTankColor[i], SW_SHOW);
+		}
+		ShowWindow(hwndEditTankColor, SW_SHOW);
+	}
+
+	void selectionHide(HWND hwnd) {
+		ShowWindow(hwndButtonBeginGame, SW_HIDE);
+		ShowWindow(hwndButtonBack, SW_HIDE);
+		UpdateWindow(hwndButtonBeginGame);
+		UpdateWindow(hwndButtonBack);
+
+		for (int i = 0;i < MAX_PLAYER;i++) {
+			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
+			UpdateWindow(hwndRadioGroupPlayerNumber[i]);
+			if (SendMessage(hwndRadioGroupPlayerNumber[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+				computers = GetDlgCtrlID(hwndRadioGroupPlayerNumber[i]) - NO_PLAYER;
+			}
+		}
+		ShowWindow(hwndEditPlayerNumber, SW_HIDE);
+
+		for (int i = 0;i < 3;i++) {
+			ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
+			UpdateWindow(hwndRadioGroupMapType[i]);
+			if (SendMessage(hwndRadioGroupMapType[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+				MapSize = GetDlgCtrlID(hwndRadioGroupMapType[i]);
+			}
+		}
+		ShowWindow(hwndEditMapType, SW_HIDE);
+
+		for (int i = 0;i < 5;i++) {
+			ShowWindow(hwndRadioGroupTankColor[i], SW_HIDE);
+			UpdateWindow(hwndRadioGroupTankColor[i]);
+			if (SendMessage(hwndRadioGroupTankColor[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+				PlayerColor = GetDlgCtrlID(hwndRadioGroupTankColor[i]);
+			}
+		}
+		ShowWindow(hwndEditTankColor, SW_HIDE);
+	}
+
 	void buttonDown(HWND hwnd, WPARAM wParam){
-		char e[256] = { 0 };
 		//用于判断是否选择了游戏模式
 		switch (LOWORD(wParam))
 		{
 		case SINGLE_GAME:
-			for (int i = 0;i < MAX_PLAYER;i++) {
-                ShowWindow(hwndRadioGroupPlayerNumber[i], SW_SHOW);
-			}
-			ShowWindow(hwndEditPlayerNumber, SW_SHOW);
-
-			for (int i = 0;i < 3;i++) {
-				ShowWindow(hwndRadioGroupMapType[i], SW_SHOW);
-			}
-			ShowWindow(hwndEditMapType, SW_SHOW);
-
-			for (int i = 0;i < 5;i++) {
-				ShowWindow(hwndRadioGroupTankColor[i], SW_SHOW);
-			}
-			ShowWindow(hwndEditTankColor, SW_SHOW);
-
+			selectionShow(hwnd);
+			selectGameMode(hwnd);
 			GameMode = SINGLE_GAME;
 			break;
 		case ONLINE_GAME:
@@ -316,47 +332,13 @@ namespace TankTrouble
 			GameMode = CAMPAIGN;
 			break;
 		case BEGIN_GAME:
-            ShowWindow(hwndButtonBeginGame, SW_HIDE);
-            ShowWindow(hwndButtonBack, SW_HIDE);
-            UpdateWindow(hwndButtonBeginGame);
-            UpdateWindow(hwndButtonBack);
-
-			for (int i = 0;i < MAX_PLAYER;i++) {
-                ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
-				UpdateWindow(hwndRadioGroupPlayerNumber[i]);
-				if (SendMessage(hwndRadioGroupPlayerNumber[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-					computers = GetDlgCtrlID(hwndRadioGroupPlayerNumber[i]) - NO_PLAYER;
-				}
-			}
-			ShowWindow(hwndEditPlayerNumber, SW_HIDE);
-
-			for (int i = 0;i < 3;i++) {
-                ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
-                UpdateWindow(hwndRadioGroupMapType[i]);
-				if (SendMessage(hwndRadioGroupMapType[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-					MapSize = GetDlgCtrlID(hwndRadioGroupMapType[i]);
-				}
-			}
-			ShowWindow(hwndEditMapType, SW_HIDE);
-
-			for (int i = 0;i < 5;i++) {
-				ShowWindow(hwndRadioGroupTankColor[i], SW_HIDE);
-				UpdateWindow(hwndRadioGroupTankColor[i]);
-				if (SendMessage(hwndRadioGroupTankColor[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-					PlayerColor = GetDlgCtrlID(hwndRadioGroupTankColor[i]);
-				}
-			}
-			ShowWindow(hwndEditTankColor, SW_HIDE);
-			
-			sprintf_s(e, sizeof(e), "%d %d\n", MapSize, computers);
-			WriteConsoleA(g_hOutput, e, (DWORD)strlen(e), nullptr, nullptr);
+			selectionHide(hwnd);
 			switch (GameMode) 
 			{
 			case NOSELECT:
 				break;
 			case SINGLE_GAME:
-				WriteConsoleA(g_hOutput, e, (DWORD)strlen(e), nullptr, nullptr);
-				GenerateMap(MapSize);
+				singleGameInit();
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
 				break;
 			case ONLINE_GAME:
@@ -366,7 +348,6 @@ namespace TankTrouble
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CAMPAIGNWndProc);
 				break;
 			}
-			
 			InvalidateRect(hwnd, nullptr, TRUE);
 			return ;
 		case BACK:
@@ -374,63 +355,27 @@ namespace TankTrouble
 			InvalidateRect(hwnd, nullptr, TRUE);
 			return ;
 		}
-		if (GameMode != NOSELECT) {
-			selectGameMode(hwnd);
-		}
 	}
 
 	void selectGameMode(HWND hwnd) {
-
-		ShowWindow(hwndButtonSingleGame, SW_HIDE);
-		ShowWindow(hwndButtonOnlineGame, SW_HIDE);
-		ShowWindow(hwndButtonCampaign, SW_HIDE);
+		menuHide(hwnd);
 		
 		InvalidateRect(hwnd, nullptr, TRUE);
 
 		ShowWindow(hwndButtonBeginGame, SW_SHOW);
         ShowWindow(hwndButtonBack, SW_SHOW);
-
-		//创建地图边缘的墙
-		WallPool.push_back(make_shared<Wall>
-			(point{ LeftWall ,UpWall }, point{ LeftWall,BottomWall }, MapSize)
-		);
-		WallPool.push_back(make_shared<Wall>
-			(point{ RightWall ,UpWall }, point{ RightWall,BottomWall }, MapSize)
-		);
-		WallPool.push_back(make_shared<Wall>
-			(point{ LeftWall ,UpWall }, point{ RightWall,UpWall }, MapSize)
-		);
-		WallPool.push_back(make_shared<Wall>
-			(point{ LeftWall ,BottomWall }, point{ RightWall,BottomWall }, MapSize)
-		);
 	}
 
 	void repickMode(HWND hwnd){
 		GameMode = NOSELECT;
 
-		ShowWindow(hwndButtonSingleGame, SW_SHOW);
-		ShowWindow(hwndButtonOnlineGame, SW_SHOW);
-		ShowWindow(hwndButtonCampaign, SW_SHOW);
+		menuShow(hwnd);
 
 		InvalidateRect(hwnd, nullptr, TRUE);
 
 		ShowWindow(hwndButtonBeginGame, SW_HIDE);
 		ShowWindow(hwndButtonBack, SW_HIDE);
-
-		for (int i = 0;i < MAX_PLAYER;i++) {
-			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
-		}
-		ShowWindow(hwndEditPlayerNumber, SW_HIDE);
-
-		for (int i = 0;i < 3;i++) {
-			ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
-		}
-		ShowWindow(hwndEditMapType, SW_HIDE);
-
-		for (int i = 0;i < 5;i++) {
-            ShowWindow(hwndRadioGroupTankColor[i], SW_HIDE);
-		}
-		ShowWindow(hwndEditTankColor, SW_HIDE);
+		selectionHide(hwnd);
 	}
 
 	void paint(HWND hwnd) {
@@ -535,10 +480,8 @@ namespace TankTrouble
 	}
 
 	int start(
-		HINSTANCE hInstance,
-		HINSTANCE hPrevInstance,
-		LPSTR lpCmdLine,
-		int nCmdShow)
+		HINSTANCE hInstance,HINSTANCE hPrevInstance,
+		LPSTR lpCmdLine,int nCmdShow)
 	{
 		
 		auto const pClassName = L"TankTrouble";
@@ -569,12 +512,8 @@ namespace TankTrouble
 
 		init(hwnd);
 
-		TankPool.emplace_back(std::make_shared<Tank>(0, 0, point(2 * WindowWidth / 20, 2 * WindowHeight / 20),
-			point(1, 0), MapSize, RED));
-
 		//show the window
 		ShowWindow(hwnd, SW_SHOW);
-
 		UpdateWindow(hwnd);
 
 		MSG message;
@@ -604,7 +543,6 @@ namespace TankTrouble
 			else {
 				//WriteConsole(g_hOutput, L"2222", 4, nullptr,nullptr);
 			}
-
 		}
 
 		// 释放资源
@@ -627,7 +565,5 @@ namespace TankTrouble
 		DestroyWindow(hwnd);
 
 		return 0;
-
 	}
-
 }

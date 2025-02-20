@@ -21,17 +21,17 @@ namespace TankTrouble {
 		this->size = size;
 		movingStep = 3;
 
-		if (this->size == 1) {
-			length = 4 * WindowWidth / 60.0;
-			width = 3 * WindowWidth / 60.0;
+		if (this->size == SMALL_MAP) {
+			length = 4 * WindowWidth / 50.0;
+			width = 3 * WindowWidth / 50.0;
 		}
-		if (this->size == 2) {
+		if (this->size == MEDIUM_MAP) {
+			length = 4 * WindowWidth / 65.0;
+			width = 3 * WindowWidth / 65.0;
+		}
+		if (this->size == LARGE_MAP) {
 			length = 4 * WindowWidth / 80.0;
 			width = 3 * WindowWidth / 80.0;
-		}
-		if (this->size == 3) {
-			length = 4 * WindowWidth / 100.0;
-			width = 3 * WindowWidth / 100.0;
 		}
 
 		getTank();
@@ -82,18 +82,18 @@ namespace TankTrouble {
 		point normalVector = direction.normalVector();
 		if ((direction ^ normalVector) > 0) {
 			if (isBackward) {
-				direction = direction + normalVector / 40;
+				direction = direction + normalVector / RotationRatio;
 			}
 			else {
-				direction = direction - normalVector / 40;
+				direction = direction - normalVector / RotationRatio;
 			}
 		}
 		else {
 			if (isBackward) {
-				direction = direction - normalVector / 40;
+				direction = direction - normalVector / RotationRatio;
 			}
 			else {
-				direction = direction + normalVector / 40;
+				direction = direction + normalVector / RotationRatio;
 			}
 		}
 		direction = direction / norm(direction);
@@ -172,7 +172,7 @@ namespace TankTrouble {
 		Polygon(hdcMem, toPOINT(barrel, 4), 4);
 	}
 
-	bool Tank::CollisionWall() {
+	bool Tank::CollisionWall() const {
 		for (int i = 0;i < 4;i++) {
 			for (auto& wall : WallPool) {
 				if (IntersectSegSeg(barrel[i], barrel[(i + 1) % 4],

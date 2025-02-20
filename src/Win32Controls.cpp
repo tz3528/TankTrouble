@@ -1,4 +1,5 @@
 #include "Win32Controls.h"
+#include "Window.h"
 
 namespace TankTrouble {
 
@@ -13,6 +14,10 @@ namespace TankTrouble {
 		DEFAULT_PITCH | FF_SWISS,  // 字体间距和族
 		L"Arial"                   // 字体名称
 	);
+
+	
+
+	
 
 	void CreateRadioGroupHorizontal(
 		HWND hwnd, int x, int y, int width, int height,

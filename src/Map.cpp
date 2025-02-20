@@ -20,14 +20,14 @@ namespace TankTrouble {
             throw invalid_argument("u and v cannot be the same point");
         }
 
-        if (size == 1) {
+        if (size == SMALL_MAP) {
             this->HalfWidth = 8;
         }
-        if (size == 2) {
-            this->HalfWidth = 4;
+        if (size == MEDIUM_MAP) {
+            this->HalfWidth = 6;
         }
-        if (size == 3) {
-            this->HalfWidth = 2;
+        if (size == LARGE_MAP) {
+            this->HalfWidth = 4;
         }
         if (u.x == v.x) {
             if (u.y > v.y) swap(u, v);
@@ -92,6 +92,7 @@ namespace TankTrouble {
     }
 
     void GenerateMap(int mapSize){
+        MapSize = mapSize;
         if (mapSize == SMALL_MAP) {
             Row = SMALL_ROW;
             Column = SMALL_COLUMN;

@@ -22,10 +22,10 @@ namespace TankTrouble
 //不同地图大小的行列数
 #define SMALL_ROW			4
 #define SMALL_COLUMN		5
-#define MEDIUM_ROW			8
-#define MEDIUM_COLUMN		10
-#define LARGE_ROW			12
-#define LARGE_COLUMN		15
+#define MEDIUM_ROW			6
+#define MEDIUM_COLUMN		8
+#define LARGE_ROW			8
+#define LARGE_COLUMN		10
 
 	class Wall
 	{
@@ -51,6 +51,7 @@ namespace TankTrouble
 		int row, column;
 	};
 
+	static int MapSize = SMALL_MAP;
 	static int Row, Column;
 	static int xGap, yGap;
 	static int beginNum;

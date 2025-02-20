@@ -36,7 +36,7 @@ namespace TankTrouble
 	extern HBITMAP hbmMem;
 
 	static int GameMode = NOSELECT;
-	static int MapSize = 1;
+	
 	static int computers = 0;
 	static COLORREF PlayerColor = RED;
 	
@@ -47,13 +47,17 @@ namespace TankTrouble
 		int nCmdShow);
 
 	LRESULT CALLBACK StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-	LRESULT CALLBACK SingleGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK CAMPAIGNWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void init(HWND hwnd);
 	void buttonInit(HWND hwnd);
 	void radioButtonInit(HWND hwnd);
+
+	void menuShow(HWND hwnd);
+	void menuHide(HWND hwnd);
+	void selectionShow(HWND hwnd);
+	void selectionHide(HWND hwnd);
 
 	void buttonDown(HWND hwnd, WPARAM wParam);
 	void selectGameMode(HWND hwnd);

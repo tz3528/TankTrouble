@@ -25,18 +25,18 @@ namespace TankTrouble {
 	{
 		this->id = id;
 		this->controller = controller;
-		this->life = 800;
+		this->life = 600;
 
-		if (size == 1) {
-			this->radius = 8;
+		if (size == SMALL_MAP) {
+			this->radius = 10;
 			this->movingStep = SMALL_MAP_STEP;
 		}
-		if (size == 2) {
-			this->radius = 4;
+		if (size == MEDIUM_MAP) {
+			this->radius = 7;
 			this->movingStep = MID_MAP_STEP;
 		}
-		if (size == 3) {
-			this->radius = 2;
+		if (size == LARGE_MAP) {
+			this->radius = 4;
 			this->movingStep = BIG_MAP_STEP;
 		}
 
@@ -87,7 +87,7 @@ namespace TankTrouble {
 		direction.x *= invx;
 		direction.y *= invy;
 
-		if (life >= 790) return;
+		if (life >= 590) return;
 		for (auto Tank = TankPool.begin();Tank != TankPool.end();) {
 			bool IsCollision = false;
 			for (int i = 0;i < 4;i++) {
