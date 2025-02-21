@@ -48,7 +48,7 @@ namespace TankTrouble
     };
 
     static int RotationRatio = 20;
-    point direction[4] = {
+    static point directions[4] = {
         point(1, 0), point(0, 1), point(-1, 0), point(0, -1)
     };
 

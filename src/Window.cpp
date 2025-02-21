@@ -1,20 +1,21 @@
 #include "Window.h"
-#include "point.h"
 #include "bullet.h"
 #include "Map.h"
 #include "Tank.h"
 #include "SingleGame.h"
+#include "OnlineGame.h"
+#include "Campaign.h"
 
 #include <windows.h>
 #include <iostream>
-#include <vector>
-#include <commctrl.h>
 
 namespace TankTrouble
 {
 	std::mutex uiMutex;
 	std::condition_variable uiCv;
 	bool update;
+
+	int Running;
 
 	HANDLE g_hOutput = 0;
 
@@ -30,58 +31,6 @@ namespace TankTrouble
 		case WM_COMMAND: {
 			buttonDown(hwnd, wParam);
 			break;
-		}
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hwnd, message, wParam, lParam);
-		}
-		return 0;
-	}
-
-	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		switch (message)
-		{
-		case WM_KEYDOWN:
-			keyDown(hwnd, wParam);
-			break;
-		case WM_KEYUP:
-			keyUp(hwnd, wParam);
-			break;
-		case WM_PAINT:
-			paint(hwnd);
-			break;
-		case WM_ERASEBKGND:
-		{
-			return 1; // 告诉Windows消息已经被处理
-		}
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hwnd, message, wParam, lParam);
-		}
-		return 0;
-	}
-
-	LRESULT CALLBACK CAMPAIGNWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		switch (message)
-		{
-		case WM_KEYDOWN:
-			keyDown(hwnd, wParam);
-			break;
-		case WM_KEYUP:
-			keyUp(hwnd, wParam);
-			break;
-		case WM_PAINT:
-			paint(hwnd);
-			break;
-		case WM_ERASEBKGND:
-		{
-			return 1; // 告诉Windows消息已经被处理
 		}
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -167,10 +116,8 @@ namespace TankTrouble
 	void radioButtonInit(HWND hwnd){
 		//玩家数量信息
         ControlsInfo PlayerNumberInfo[MAX_PLAYER] = {
-            {ONE_PLAYER, L"1"},
-            {TWO_PLAYER, L"2"},
-            {THREE_PLAYER, L"3"},
-            {FOUR_PLAYER, L"4"},
+            {ONE_PLAYER, L"1"},		{TWO_PLAYER, L"2"},
+            {THREE_PLAYER, L"3"},	{FOUR_PLAYER, L"4"},
         };
 		/*单选按钮组的坐上顶点横坐标通过计算得出
 		* 这里的计算方式是
@@ -202,9 +149,7 @@ namespace TankTrouble
 
 		//地图大小
 		ControlsInfo MapInfo[3] = {
-			{SMALL_MAP, L"小"},
-			{MEDIUM_MAP, L"中"},
-            {LARGE_MAP, L"大"}
+			{SMALL_MAP, L"小"},{MEDIUM_MAP, L"中"},{LARGE_MAP, L"大"}
 		};
 		CreateRadioGroupHorizontal(
 			hwnd, groupLeft, 100 + RadioButtonHeight + ButtonGap,
@@ -285,12 +230,9 @@ namespace TankTrouble
 	void selectionHide(HWND hwnd) {
 		ShowWindow(hwndButtonBeginGame, SW_HIDE);
 		ShowWindow(hwndButtonBack, SW_HIDE);
-		UpdateWindow(hwndButtonBeginGame);
-		UpdateWindow(hwndButtonBack);
 
 		for (int i = 0;i < MAX_PLAYER;i++) {
 			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
-			UpdateWindow(hwndRadioGroupPlayerNumber[i]);
 			if (SendMessage(hwndRadioGroupPlayerNumber[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
 				computers = GetDlgCtrlID(hwndRadioGroupPlayerNumber[i]) - NO_PLAYER;
 			}
@@ -299,7 +241,6 @@ namespace TankTrouble
 
 		for (int i = 0;i < 3;i++) {
 			ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
-			UpdateWindow(hwndRadioGroupMapType[i]);
 			if (SendMessage(hwndRadioGroupMapType[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
 				MapSize = GetDlgCtrlID(hwndRadioGroupMapType[i]);
 			}
@@ -308,7 +249,6 @@ namespace TankTrouble
 
 		for (int i = 0;i < 5;i++) {
 			ShowWindow(hwndRadioGroupTankColor[i], SW_HIDE);
-			UpdateWindow(hwndRadioGroupTankColor[i]);
 			if (SendMessage(hwndRadioGroupTankColor[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
 				PlayerColor = GetDlgCtrlID(hwndRadioGroupTankColor[i]);
 			}
@@ -335,8 +275,6 @@ namespace TankTrouble
 			selectionHide(hwnd);
 			switch (GameMode) 
 			{
-			case NOSELECT:
-				break;
 			case SINGLE_GAME:
 				singleGameInit();
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
@@ -345,7 +283,7 @@ namespace TankTrouble
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
 				break;
 			case CAMPAIGN:
-				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CAMPAIGNWndProc);
+				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CampaignWndProc);
 				break;
 			}
 			InvalidateRect(hwnd, nullptr, TRUE);
@@ -370,8 +308,6 @@ namespace TankTrouble
 		GameMode = NOSELECT;
 
 		menuShow(hwnd);
-
-		InvalidateRect(hwnd, nullptr, TRUE);
 
 		ShowWindow(hwndButtonBeginGame, SW_HIDE);
 		ShowWindow(hwndButtonBack, SW_HIDE);
@@ -428,56 +364,7 @@ namespace TankTrouble
 		EndPaint(hwnd, &ps);
 	}
 
-	void keyDown(HWND hwnd, WPARAM wParam) {
-		for (auto& Tank : TankPool) {
-			if (Tank->getController() == COMPUTER)
-				continue;
 
-			if (wParam == 'J') {
-				Tank->isAttack = true;
-			}
-			else {
-				if (wParam == 'W') {
-					Tank->isForward = true;
-				}
-				if (wParam == 'S') {
-					Tank->isBackward = true;
-				}
-				if (wParam == 'A') {
-					Tank->isLeft = true;
-				}
-				if (wParam == 'D') {
-					Tank->isRight = true;
-				}
-			}
-		}
-
-	}
-
-	void keyUp(HWND hwnd, WPARAM wParam) {
-		for (auto& Tank : TankPool) {
-			if (Tank->getController() == COMPUTER)
-				continue;
-
-			if (wParam == 'J') {
-				Tank->isAttack = false;
-			}
-			else {
-				if (wParam == 'W') {
-					Tank->isForward = false;
-				}
-				if (wParam == 'S') {
-					Tank->isBackward = false;
-				}
-				if (wParam == 'A') {
-					Tank->isLeft = false;
-				}
-				if (wParam == 'D') {
-					Tank->isRight = false;
-				}
-			}
-		}
-	}
 
 	int start(
 		HINSTANCE hInstance,HINSTANCE hPrevInstance,
@@ -512,7 +399,6 @@ namespace TankTrouble
 
 		init(hwnd);
 
-		//show the window
 		ShowWindow(hwnd, SW_SHOW);
 		UpdateWindow(hwnd);
 
@@ -523,6 +409,8 @@ namespace TankTrouble
 		//char tmp[256] = { 0 };
 		//sprintf_s(tmp, sizeof(tmp), "%d %d %d %d\n", LeftWall, RightWall, UpWall, BottomWall);
 		//WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
+
+		Running = true;
 
 		std::thread bulletThread(bulletPoolUpdate);
 		std::thread tankThread(TankControl);
@@ -545,6 +433,12 @@ namespace TankTrouble
 			}
 		}
 
+		/*这里停掉线程
+		* 避免提前释放了资源,造成访问野指针
+		*/
+		Running = false;
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
 		// 释放资源
 		for (auto& tank : TankPool) {
 			tank.reset();
@@ -561,7 +455,6 @@ namespace TankTrouble
 		}
 		WallPool.clear();
 
-		// 销毁窗口
 		DestroyWindow(hwnd);
 
 		return 0;

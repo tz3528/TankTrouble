@@ -218,7 +218,7 @@ namespace TankTrouble {
 	}
 
 	void TankControl() {
-		while (1) {
+		while (Running) {
 			for (auto& Tank : TankPool) {
 				if (Tank->getController() == PLAYER) {
 					PlayerControl(Tank.get());

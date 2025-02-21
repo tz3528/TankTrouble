@@ -7,11 +7,6 @@
 #include <graphics.h>
 #include <memory>
 #include <iostream>
-#include <gdiplus.h>
-
-#pragma comment (lib,"Gdiplus.lib")
-
-using namespace Gdiplus;
 
 namespace TankTrouble {
 
@@ -110,7 +105,7 @@ namespace TankTrouble {
 	}
 
 	void bulletPoolUpdate() {
-		while (1) {
+		while (Running) {
 			{
 				std::unique_lock<std::mutex> lock(bpMutex);
 				bpCv.wait(lock, [] {return !bulletPool.empty();});

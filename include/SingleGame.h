@@ -12,6 +12,8 @@ namespace TankTrouble
 	
 	void singleGameRestart();
 
+	void keyDown(HWND hwnd, WPARAM wParam);
+	void keyUp(HWND hwnd, WPARAM wParam);
 }
 
 #endif 

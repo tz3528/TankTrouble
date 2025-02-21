@@ -37,19 +37,19 @@ namespace TankTrouble
 
 	void singleGameInit() {
 		//创建地图边缘的墙
-		WallPool.push_back(make_shared<Wall>
+		WallPool.emplace_back(make_shared<Wall>
 			(point{ LeftWall ,UpWall }, point{ LeftWall,BottomWall }, MapSize)
 		);
-		WallPool.push_back(make_shared<Wall>
+		WallPool.emplace_back(make_shared<Wall>
 			(point{ RightWall ,UpWall }, point{ RightWall,BottomWall }, MapSize)
 		);
-		WallPool.push_back(make_shared<Wall>
+		WallPool.emplace_back(make_shared<Wall>
 			(point{ LeftWall ,UpWall }, point{ RightWall,UpWall }, MapSize)
 		);
-		WallPool.push_back(make_shared<Wall>
+		WallPool.emplace_back(make_shared<Wall>
 			(point{ LeftWall ,BottomWall }, point{ RightWall,BottomWall }, MapSize)
 		);
-		TankPool.emplace_back(std::make_shared<Tank>(0, 0, point(2 * WindowWidth / 20, 2 * WindowHeight / 20),
+		TankPool.emplace_back(make_shared<Tank>(0, 0, point(2 * WindowWidth / 20, 2 * WindowHeight / 20),
 			point(1, 0), MapSize, PlayerColor));
 		GenerateMap(MapSize);
 	}
@@ -72,13 +72,62 @@ namespace TankTrouble
 		bpCv.notify_one();
 
 		
-
 		for (auto& wall : WallPool) {
 			wall.reset();
 		}
 		WallPool.clear();
 
         singleGameInit();
+	}
+
+	void keyDown(HWND hwnd, WPARAM wParam) {
+		for (auto& Tank : TankPool) {
+			if (Tank->getController() == COMPUTER)
+				continue;
+
+			if (wParam == 'J') {
+				Tank->isAttack = true;
+			}
+			else {
+				if (wParam == 'W') {
+					Tank->isForward = true;
+				}
+				if (wParam == 'S') {
+					Tank->isBackward = true;
+				}
+				if (wParam == 'A') {
+					Tank->isLeft = true;
+				}
+				if (wParam == 'D') {
+					Tank->isRight = true;
+				}
+			}
+		}
+	}
+
+	void keyUp(HWND hwnd, WPARAM wParam) {
+		for (auto& Tank : TankPool) {
+			if (Tank->getController() == COMPUTER)
+				continue;
+
+			if (wParam == 'J') {
+				Tank->isAttack = false;
+			}
+			else {
+				if (wParam == 'W') {
+					Tank->isForward = false;
+				}
+				if (wParam == 'S') {
+					Tank->isBackward = false;
+				}
+				if (wParam == 'A') {
+					Tank->isLeft = false;
+				}
+				if (wParam == 'D') {
+					Tank->isRight = false;
+				}
+			}
+		}
 	}
 
 }

@@ -35,6 +35,8 @@ namespace TankTrouble
 	extern HDC hdcMem;
 	extern HBITMAP hbmMem;
 
+	extern int Running;
+
 	static int GameMode = NOSELECT;
 	
 	static int computers = 0;
@@ -47,9 +49,7 @@ namespace TankTrouble
 		int nCmdShow);
 
 	LRESULT CALLBACK StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-	LRESULT CALLBACK CAMPAIGNWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-
+	
 	void init(HWND hwnd);
 	void buttonInit(HWND hwnd);
 	void radioButtonInit(HWND hwnd);
@@ -64,8 +64,6 @@ namespace TankTrouble
 	void repickMode(HWND hwnd);
 
 	void paint(HWND hwnd);
-	void keyDown(HWND hwnd, WPARAM wParam);
-	void keyUp(HWND hwnd, WPARAM wParam);
 }
 
 #endif //WINDOW_Hs
