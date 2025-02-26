@@ -1,13 +1,12 @@
 #include "Tank.h"
 #include "bullet.h"
 #include "Window.h"
-#include "Wall.h"
+#include "Map.h"
 #include "point.h"
 
 #include <graphics.h>
 #include <windows.h>
 #include <mmsystem.h>
-
 
 #pragma comment(lib, "Winmm.lib")
 
@@ -20,19 +19,19 @@ namespace TankTrouble {
 		this->id = id;
 		this->controller = controller;
 		this->size = size;
-		movingStep = 2;
+		movingStep = 3;
 
-		if (this->size == 1) {
-			length = 4 * WindowWidth / 60.0;
-			width = 3 * WindowWidth / 60.0;
+		if (this->size == SMALL_MAP) {
+			length = 4 * WindowWidth / 50.0;
+			width = 3 * WindowWidth / 50.0;
 		}
-		if (this->size == 2) {
+		if (this->size == MEDIUM_MAP) {
+			length = 4 * WindowWidth / 65.0;
+			width = 3 * WindowWidth / 65.0;
+		}
+		if (this->size == LARGE_MAP) {
 			length = 4 * WindowWidth / 80.0;
 			width = 3 * WindowWidth / 80.0;
-		}
-		if (this->size == 3) {
-			length = 4 * WindowWidth / 100.0;
-			width = 3 * WindowWidth / 100.0;
 		}
 
 		getTank();
@@ -47,10 +46,10 @@ namespace TankTrouble {
 		body[1] = position + direction * length / 2 - direction.normalVector() * width / 2;
 		body[2] = position - direction * length / 2 - direction.normalVector() * width / 2;
 		body[3] = position - direction * length / 2 + direction.normalVector() * width / 2;
-		barrel[0] = position + direction * length * 3 / 4 + direction.normalVector() * width / 4;
-		barrel[1] = position + direction * length * 3 / 4 - direction.normalVector() * width / 4;
-		barrel[2] = position - direction * length / 6 - direction.normalVector() * width / 4;
-		barrel[3] = position - direction * length / 6 + direction.normalVector() * width / 4;
+		barrel[0] = position + direction * length * 3 / 4 + direction.normalVector() * width / 6;
+		barrel[1] = position + direction * length * 3 / 4 - direction.normalVector() * width / 6;
+		barrel[2] = position - direction * length / 6 - direction.normalVector() * width / 6;
+		barrel[3] = position - direction * length / 6 + direction.normalVector() * width / 6;
 	}
 
 	void Tank::forward() {
@@ -83,18 +82,18 @@ namespace TankTrouble {
 		point normalVector = direction.normalVector();
 		if ((direction ^ normalVector) > 0) {
 			if (isBackward) {
-				direction = direction + normalVector / 40;
+				direction = direction + normalVector / RotationRatio;
 			}
 			else {
-				direction = direction - normalVector / 40;
+				direction = direction - normalVector / RotationRatio;
 			}
 		}
 		else {
 			if (isBackward) {
-				direction = direction - normalVector / 40;
+				direction = direction - normalVector / RotationRatio;
 			}
 			else {
-				direction = direction + normalVector / 40;
+				direction = direction + normalVector / RotationRatio;
 			}
 		}
 		direction = direction / norm(direction);
@@ -112,19 +111,19 @@ namespace TankTrouble {
 		point normalVector = direction.normalVector();
 		if ((direction ^ normalVector) > 0) {
 			if (isBackward) {
-				direction = direction - normalVector / 40;
+				direction = direction - normalVector / RotationRatio;
 			}
 			else {
-				direction = direction + normalVector / 40;
+				direction = direction + normalVector / RotationRatio;
 			}
 
 		}
 		else {
 			if (isBackward) {
-				direction = direction + normalVector / 40;
+				direction = direction + normalVector / RotationRatio;
 			}
 			else {
-				direction = direction - normalVector / 40;
+				direction = direction - normalVector / RotationRatio;
 			}
 		}
 		direction = direction / norm(direction);
@@ -173,7 +172,7 @@ namespace TankTrouble {
 		Polygon(hdcMem, toPOINT(barrel, 4), 4);
 	}
 
-	bool Tank::CollisionWall() {
+	bool Tank::CollisionWall() const {
 		for (int i = 0;i < 4;i++) {
 			for (auto& wall : WallPool) {
 				if (IntersectSegSeg(barrel[i], barrel[(i + 1) % 4],
@@ -218,10 +217,8 @@ namespace TankTrouble {
 		color = newColor;
 	}
 
-	ExMessage m = {};
-
 	void TankControl() {
-		while (1) {
+		while (Running) {
 			for (auto& Tank : TankPool) {
 				if (Tank->getController() == PLAYER) {
 					PlayerControl(Tank.get());

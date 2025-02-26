@@ -42,13 +42,13 @@ namespace TankTrouble
     //点、线运算
 
     //计算点集中x坐标的最小值
-    long getMinX(const point* points, int n);
+    double getMinX(const point* points, int n);
     //计算点集中y坐标的最小值
-    long getMinY(const point* points, int n);
+    double getMinY(const point* points, int n);
     //计算点集中x坐标的最大值
-    long getMaxX(const point* points, int n);
+    double getMaxX(const point* points, int n);
     //计算点集中y坐标的最大值
-    long getMaxY(const point* points, int n);
+    double getMaxY(const point* points, int n);
     //计算点u到现段vw的距离
     double distPointSeg(const point u, const point v, const point w);
     //判断线段ab与线段cd是否相交

@@ -7,8 +7,8 @@
 #include <list>
 #include <memory>
 
-constexpr double SMALL_MAP_STEP = 2;
-constexpr double MID_MAP_STEP = 1.5;
+constexpr double SMALL_MAP_STEP = 3;
+constexpr double MID_MAP_STEP = 2;
 constexpr double BIG_MAP_STEP = 1;
 
 namespace TankTrouble

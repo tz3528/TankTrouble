@@ -29,7 +29,7 @@ namespace TankTrouble
         void addbullet();
         void draw(HDC hdcMem) override;
 
-        bool CollisionWall();
+        bool CollisionWall() const;
 
         int getId() const;
         int getController() const;
@@ -39,12 +39,17 @@ namespace TankTrouble
         bool isAttack = false;
 
     private:
-        int id, size, bullets = 20;
+        int id, size, bullets = 15;
         int controller;
         double movingStep, length, width;
         point tmpPosition, tmpDirection;
         const int attackInterval = 100;
         std::chrono::steady_clock::time_point lastAttack;
+    };
+
+    static int RotationRatio = 20;
+    static point directions[4] = {
+        point(1, 0), point(0, 1), point(-1, 0), point(0, -1)
     };
 
     extern std::list<std::shared_ptr<Tank>> TankPool;
