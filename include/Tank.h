@@ -2,11 +2,15 @@
 #define TANK_H
 
 #include "Object.h"
+#include "Map.h"
+#include "bullet.h"
+#include "Window.h"
+#include "geometry.h"
+#include "pch.h"
 
-#include <windows.h>
-#include <list>
-#include <memory>
+#include <thread>
 #include <chrono>
+#include <windows.h>
 
 constexpr int PLAYER = 0;
 constexpr int COMPUTER = 1;
@@ -29,21 +33,27 @@ namespace TankTrouble
         void addbullet();
         void draw(HDC hdcMem) override;
 
-        bool CollisionWall() const;
+        bool Collision() const;
 
         int getId() const;
         int getController() const;
+        point getposition() const;
+        void getGridPosition();
         void setColor(COLORREF color);
+
         point body[4], barrel[4];
         bool isForward = false, isBackward = false, isLeft = false, isRight = false;
         bool isAttack = false;
+        GridPosition pos;
+        bool isLife = true;
 
     private:
-        int id, size, bullets = 15;
+        int id, size, bullets = 10;
         int controller;
         double movingStep, length, width;
         point tmpPosition, tmpDirection;
-        const int attackInterval = 100;
+        const int attackInterval = 200;
+       
         std::chrono::steady_clock::time_point lastAttack;
     };
 
@@ -52,11 +62,10 @@ namespace TankTrouble
         point(1, 0), point(0, 1), point(-1, 0), point(0, -1)
     };
 
-    extern std::list<std::shared_ptr<Tank>> TankPool;
+    extern list<std::shared_ptr<Tank>> TankPool;
+    extern shared_mutex tpMutex;
 
     void TankControl();
-    void PlayerControl(Tank* Player);
-    void ComputerControl(Tank* Computer);
 }
 
 #endif // TANK_H

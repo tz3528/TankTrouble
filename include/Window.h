@@ -1,13 +1,21 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "bullet.h"
+#include "Map.h"
+#include "Tank.h"
+#include "GameMode/SingleGame.h"
+#include "GameMode/OnlineGame.h"
+#include "GameMode/Campaign.h"
 #include "Win32Controls.h"
+#include "ThreadPool.h"
 
 #include <graphics.h>
 #include <mutex>
 #include <condition_variable>
 #include <wrl.h>
 #include <windows.h>
+#include <iostream>
 
 using Microsoft::WRL::ComPtr;
 
@@ -29,18 +37,15 @@ namespace TankTrouble
 	static int WindowWidth = 1280;
 	static int WindowHeight = 720;
 
+	extern ThreadPool threadPool;
 	//边缘四面墙的坐标
 	extern int LeftWall, RightWall, UpWall, BottomWall;
-
 	extern HDC hdcMem;
 	extern HBITMAP hbmMem;
-
 	extern int Running;
-
-	static int GameMode = NOSELECT;
-	
-	static int computers = 0;
-	static COLORREF PlayerColor = RED;
+	extern int GameMode;
+	extern int computers;
+	extern COLORREF PlayerColor;
 	
 	int start(
 		HINSTANCE hInstance,
@@ -54,16 +59,12 @@ namespace TankTrouble
 	void buttonInit(HWND hwnd);
 	void radioButtonInit(HWND hwnd);
 
-	void menuShow(HWND hwnd);
-	void menuHide(HWND hwnd);
-	void selectionShow(HWND hwnd);
-	void selectionHide(HWND hwnd);
-
 	void buttonDown(HWND hwnd, WPARAM wParam);
 	void selectGameMode(HWND hwnd);
 	void repickMode(HWND hwnd);
 
-	void paint(HWND hwnd);
+	void paintControls(HWND hwnd);
+	void paintGame(HWND hwnd);
 }
 
 #endif //WINDOW_Hs

@@ -1,11 +1,12 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include <windows.h>
+#include <math.h>
 
 namespace TankTrouble
 {
-    const double eps = 1e-8;
+    const double eps = 1e-2;
+    const double pi = acos(-1);
 
     class point
     {
@@ -29,9 +30,19 @@ namespace TankTrouble
         double operator*(const point& other) const;
         double operator^(const point& other) const;
 
+        int quad();
         point normalVector() const;
 
         double x, y;
+    };
+
+    //有向线段，其中u为起点，v为终点
+    struct Segment {
+        point u, v;
+    };
+    //射线，其中origin为起点，direction为方向向量
+    struct Ray {
+        point origin, direction;
     };
 
     double distPointPoint(const point u, const point v);
@@ -52,9 +63,26 @@ namespace TankTrouble
     //计算点u到现段vw的距离
     double distPointSeg(const point u, const point v, const point w);
     //判断线段ab与线段cd是否相交
-    bool IntersectSegSeg(const point a, const point b, const point c, const point d);
+    bool itsSegSeg(const point a, const point b, const point c, const point d);
+    //判断两个凸包是否相交
+    bool itsPolPol(const point* a, const int na, const point* b, const int nb);
 
+    class line
+    {
+    public:
+        line(point p,point q);
+        //两点式
+        point u, v;
+        //起点和方向向量决定的直线
+        point origin, direction;
+        //直线的一般方程
+        double A, B, C;
+    };
+
+    //直线的计算
+
+    //求两直线的交点
+    point itsLineLine(line l1, line l2);
 }
 
 #endif
-

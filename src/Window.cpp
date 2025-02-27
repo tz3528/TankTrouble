@@ -1,28 +1,23 @@
 #include "Window.h"
-#include "bullet.h"
-#include "Map.h"
-#include "Tank.h"
-#include "SingleGame.h"
-#include "OnlineGame.h"
-#include "Campaign.h"
-
-#include <windows.h>
-#include <iostream>
 
 namespace TankTrouble
 {
+	ThreadPool threadPool(10);
+
 	std::mutex uiMutex;
 	std::condition_variable uiCv;
 	bool update;
 
 	int Running;
+	int LeftWall, RightWall, UpWall, BottomWall;
+	int GameMode;
+	int computers;
+	COLORREF PlayerColor;
 
 	HANDLE g_hOutput = 0;
 
 	HDC hdcMem;
 	HBITMAP hbmMem;
-
-	int LeftWall, RightWall, UpWall, BottomWall;
 
 	LRESULT CALLBACK StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
@@ -31,6 +26,13 @@ namespace TankTrouble
 		case WM_COMMAND: {
 			buttonDown(hwnd, wParam);
 			break;
+		}
+		case WM_PAINT: {
+            paintGame(hwnd);
+			break;
+		}
+		case WM_ERASEBKGND: {
+			return 1;
 		}
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -50,6 +52,10 @@ namespace TankTrouble
 
 		buttonInit(hwnd);
 		radioButtonInit(hwnd);
+
+		for (int i = 1;i <= 100;i++) {
+			permutation[i] = i;
+		}
 
 	}
 
@@ -125,8 +131,7 @@ namespace TankTrouble
 		*/
 		long groupLeft = (WindowWidth - MAX_PLAYER * RadioButtonWidth - (MAX_PLAYER - 1) * ButtonGap) / 2;
 		CreateRadioGroupHorizontal(
-			hwnd, groupLeft,100,
-			RadioButtonWidth, RadioButtonHeight,
+			hwnd, groupLeft,100, RadioButtonWidth, RadioButtonHeight,
 			MAX_PLAYER, PlayerNumberInfo, hwndRadioGroupPlayerNumber
 		);
 
@@ -146,7 +151,6 @@ namespace TankTrouble
 		SendMessage(hwndEditPlayerNumber, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendMessage(hwndEditPlayerNumber, EM_SETREADONLY, TRUE, 0);
 		ShowWindow(hwndEditPlayerNumber, SW_HIDE);
-
 		//地图大小
 		ControlsInfo MapInfo[3] = {
 			{SMALL_MAP, L"小"},{MEDIUM_MAP, L"中"},{LARGE_MAP, L"大"}
@@ -171,7 +175,6 @@ namespace TankTrouble
 		SendMessage(hwndEditMapType, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendMessage(hwndEditMapType, EM_SETREADONLY, TRUE, 0);
 		ShowWindow(hwndEditMapType, SW_HIDE);
-
 		//坦克颜色
 		ControlsInfo TankColorInfo[5] = {
 			{RED, L"红色"}, {BLUE, L"蓝色"}, {GREEN, L"绿色"}, {YELLOW, L"黄色"}, {BROWN, L"棕色"},
@@ -195,64 +198,6 @@ namespace TankTrouble
 		);
 		SendMessage(hwndEditTankColor, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendMessage(hwndEditTankColor, EM_SETREADONLY, TRUE, 0);
-		ShowWindow(hwndEditTankColor, SW_HIDE);
-	}
-
-	void menuShow(HWND hwnd) {
-		ShowWindow(hwndButtonSingleGame, SW_SHOW);
-		ShowWindow(hwndButtonOnlineGame, SW_SHOW);
-		ShowWindow(hwndButtonCampaign, SW_SHOW);
-	}
-
-	void menuHide(HWND hwnd) {
-		ShowWindow(hwndButtonSingleGame, SW_HIDE);
-		ShowWindow(hwndButtonOnlineGame, SW_HIDE);
-		ShowWindow(hwndButtonCampaign, SW_HIDE);
-	}
-
-	void selectionShow(HWND hwnd) {
-		for (int i = 0;i < MAX_PLAYER;i++) {
-			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_SHOW);
-		}
-		ShowWindow(hwndEditPlayerNumber, SW_SHOW);
-
-		for (int i = 0;i < 3;i++) {
-			ShowWindow(hwndRadioGroupMapType[i], SW_SHOW);
-		}
-		ShowWindow(hwndEditMapType, SW_SHOW);
-
-		for (int i = 0;i < 5;i++) {
-			ShowWindow(hwndRadioGroupTankColor[i], SW_SHOW);
-		}
-		ShowWindow(hwndEditTankColor, SW_SHOW);
-	}
-
-	void selectionHide(HWND hwnd) {
-		ShowWindow(hwndButtonBeginGame, SW_HIDE);
-		ShowWindow(hwndButtonBack, SW_HIDE);
-
-		for (int i = 0;i < MAX_PLAYER;i++) {
-			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
-			if (SendMessage(hwndRadioGroupPlayerNumber[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-				computers = GetDlgCtrlID(hwndRadioGroupPlayerNumber[i]) - NO_PLAYER;
-			}
-		}
-		ShowWindow(hwndEditPlayerNumber, SW_HIDE);
-
-		for (int i = 0;i < 3;i++) {
-			ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
-			if (SendMessage(hwndRadioGroupMapType[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-				MapSize = GetDlgCtrlID(hwndRadioGroupMapType[i]);
-			}
-		}
-		ShowWindow(hwndEditMapType, SW_HIDE);
-
-		for (int i = 0;i < 5;i++) {
-			ShowWindow(hwndRadioGroupTankColor[i], SW_HIDE);
-			if (SendMessage(hwndRadioGroupTankColor[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-				PlayerColor = GetDlgCtrlID(hwndRadioGroupTankColor[i]);
-			}
-		}
 		ShowWindow(hwndEditTankColor, SW_HIDE);
 	}
 
@@ -280,26 +225,24 @@ namespace TankTrouble
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
 				break;
 			case ONLINE_GAME:
+				onlineGameInit();
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
 				break;
 			case CAMPAIGN:
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CampaignWndProc);
 				break;
 			}
-			InvalidateRect(hwnd, nullptr, TRUE);
 			return ;
 		case BACK:
 			repickMode(hwnd);
-			InvalidateRect(hwnd, nullptr, TRUE);
 			return ;
 		}
+		InvalidateRect(hwnd, nullptr, TRUE);
 	}
 
 	void selectGameMode(HWND hwnd) {
 		menuHide(hwnd);
 		
-		InvalidateRect(hwnd, nullptr, TRUE);
-
 		ShowWindow(hwndButtonBeginGame, SW_SHOW);
         ShowWindow(hwndButtonBack, SW_SHOW);
 	}
@@ -314,7 +257,66 @@ namespace TankTrouble
 		selectionHide(hwnd);
 	}
 
-	void paint(HWND hwnd) {
+	void paintControls(HWND hwnd) {
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+
+		// 创建兼容的内存设备上下文和位图
+		hdcMem = CreateCompatibleDC(hdc);
+		hbmMem = CreateCompatibleBitmap(hdc, WindowWidth, WindowHeight);
+		SelectObject(hdcMem, hbmMem);
+
+		// 填充背景为白色
+		HBRUSH whiteBrush = CreateSolidBrush(RGB(255, 255, 255));
+		HBRUSH oldBrush = (HBRUSH)SelectObject(hdcMem, whiteBrush);
+		RECT rect = { 0, 0, WindowWidth, WindowHeight };
+		FillRect(hdcMem, &rect, whiteBrush);
+		SelectObject(hdcMem, oldBrush);
+		DeleteObject(whiteBrush);
+
+		// 创建一个 vector 存储所有需要绘制的控件句柄
+		std::vector<HWND> hwndControls = {
+			hwndButtonSingleGame,
+			hwndButtonOnlineGame,
+			hwndButtonCampaign,
+			hwndButtonBeginGame,
+			hwndButtonBack,
+			hwndEditPlayerNumber,
+			hwndEditMapType,
+			hwndEditTankColor,
+			hwndRadioGroupPlayerNumber[0],hwndRadioGroupPlayerNumber[1],
+			hwndRadioGroupPlayerNumber[2],hwndRadioGroupPlayerNumber[3],
+			hwndRadioGroupMapType[0],hwndRadioGroupMapType[1],hwndRadioGroupMapType[2],
+			hwndRadioGroupTankColor[0],hwndRadioGroupTankColor[1],
+			hwndRadioGroupTankColor[2],hwndRadioGroupTankColor[3],
+			hwndRadioGroupTankColor[4]
+		};
+
+		// 遍历控件并绘制
+		for (HWND hwndControl : hwndControls) {
+			if (IsWindowVisible(hwndControl)) {
+				// 获取控件的矩形区域
+				RECT controlRect;
+				GetWindowRect(hwndControl, &controlRect);
+				MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&controlRect, 2);
+				// 绘制控件
+				HDC hdcControl = GetDC(hwndControl);
+				BitBlt(hdcMem, controlRect.left, controlRect.top, controlRect.right - controlRect.left, controlRect.bottom - controlRect.top, hdcControl, 0, 0, SRCCOPY);
+				ReleaseDC(hwndControl, hdcControl);
+			}
+		}
+
+		// 将内存设备上下文的内容复制到窗口设备上下文
+		//BitBlt(hdc, 0, 0, WindowWidth, WindowHeight, hdcMem, 0, 0, SRCCOPY);
+
+		// 删除内存设备上下文和位图
+		DeleteObject(hbmMem);
+		DeleteDC(hdcMem);
+
+		EndPaint(hwnd, &ps);
+	}
+
+	void paintGame(HWND hwnd) {
 		PAINTSTRUCT ps = { 0 };
 		HDC hdc = BeginPaint(hwnd, &ps);
 
@@ -331,11 +333,14 @@ namespace TankTrouble
 		SelectObject(hdcMem, oldBrush);
 		DeleteObject(whiteBrush);
 
-		// 绘制坦克
-		for (auto& Tank : TankPool) {
-			Tank->draw(hdcMem);
+		{
+			// 绘制坦克
+			shared_lock<shared_mutex> lock(tpMutex);
+			for (auto& Tank : TankPool) {
+				Tank->draw(hdcMem);
+			}
 		}
-
+		
 		// 创建黑色画刷用于绘制墙和子弹
 		HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0));
 		oldBrush = (HBRUSH)SelectObject(hdcMem, brush);
@@ -344,12 +349,12 @@ namespace TankTrouble
 		for (auto& bullet : bulletPool) {
 			bullet->draw(hdcMem);
 		}
-
+		
 		// 绘制墙
 		for (auto& wall : WallPool) {
 			wall->draw(hdcMem);
 		}
-
+		
 		// 恢复旧画刷并删除新画刷
 		SelectObject(hdcMem, oldBrush);
 		DeleteObject(brush);
@@ -362,9 +367,18 @@ namespace TankTrouble
 		DeleteDC(hdcMem);
 
 		EndPaint(hwnd, &ps);
+
 	}
 
+	void gameLoop(HWND hwnd) {
+		while (1) {
+			// 标记整个窗口区域为无效，触发 WM_PAINT 消息
+			InvalidateRect(hwnd, NULL, FALSE);
 
+			// 控制帧率
+			std::this_thread::sleep_for(std::chrono::milliseconds(8)); // 约60帧每秒
+		}
+	}
 
 	int start(
 		HINSTANCE hInstance,HINSTANCE hPrevInstance,
@@ -372,7 +386,6 @@ namespace TankTrouble
 	{
 		
 		auto const pClassName = L"TankTrouble";
-
 		// register window C lass
 		WNDCLASSEX wc = { 0 };
 		wc.cbSize = sizeof(wc);
@@ -388,7 +401,6 @@ namespace TankTrouble
 		wc.lpszClassName = pClassName;
 		wc.hbrBackground = CreateSolidBrush(WHITE);
 		RegisterClassEx(&wc);
-
 		// create window instance
 		HWND hwnd = CreateWindowEx(
 			0, pClassName, L"TankTrouble",
@@ -412,11 +424,9 @@ namespace TankTrouble
 
 		Running = true;
 
-		std::thread bulletThread(bulletPoolUpdate);
-		std::thread tankThread(TankControl);
-
-		bulletThread.detach();
-        tankThread.detach();
+		threadPool.addTask(bulletPoolUpdate);
+		threadPool.addTask(TankControl);
+		threadPool.addTask(gameLoop, hwnd);
 
 		while (true) {
 			if (PeekMessage(&message, nullptr, 0, 0, PM_NOREMOVE)) {
@@ -432,7 +442,6 @@ namespace TankTrouble
 				//WriteConsole(g_hOutput, L"2222", 4, nullptr,nullptr);
 			}
 		}
-
 		/*这里停掉线程
 		* 避免提前释放了资源,造成访问野指针
 		*/

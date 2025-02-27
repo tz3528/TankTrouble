@@ -1,4 +1,4 @@
-#include "Campaign.h"
+#include "GameMode/Campaign.h"
 
 namespace TankTrouble
 {
