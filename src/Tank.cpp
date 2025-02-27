@@ -1,8 +1,4 @@
 #include "Tank.h"
-#include "bullet.h"
-#include "Window.h"
-#include "Map.h"
-#include "point.h"
 
 #include <graphics.h>
 #include <windows.h>
@@ -12,7 +8,8 @@
 
 namespace TankTrouble {
 
-	std::list<std::shared_ptr<Tank>> TankPool;
+	list<std::shared_ptr<Tank>> TankPool;
+	shared_mutex tpMutex;
 
 	Tank::Tank(int id, int controller, point position, point direction, int size, const COLORREF& color) :
 		Object(position, direction, color) {
@@ -22,8 +19,8 @@ namespace TankTrouble {
 		movingStep = 3;
 
 		if (this->size == SMALL_MAP) {
-			length = 4 * WindowWidth / 50.0;
-			width = 3 * WindowWidth / 50.0;
+			length = 4 * WindowWidth / 60.0;
+			width = 3 * WindowWidth / 60.0;
 		}
 		if (this->size == MEDIUM_MAP) {
 			length = 4 * WindowWidth / 65.0;
@@ -35,6 +32,8 @@ namespace TankTrouble {
 		}
 
 		getTank();
+
+		getGridPosition();
 
 	}
 	Tank::~Tank() {
@@ -57,7 +56,7 @@ namespace TankTrouble {
 		tmpDirection = direction;
 		position = position + direction * movingStep;
 		getTank();
-		if (CollisionWall()) {
+		if (Collision()) {
 			position = tmpPosition;
 			direction = tmpDirection;
 			getTank();
@@ -69,7 +68,7 @@ namespace TankTrouble {
 		tmpDirection = direction;
 		position = position - direction * movingStep;
 		getTank();
-		if (CollisionWall()) {
+		if (Collision()) {
 			position = tmpPosition;
 			direction = tmpDirection;
 			getTank();
@@ -98,7 +97,7 @@ namespace TankTrouble {
 		}
 		direction = direction / norm(direction);
 		getTank();
-		if (CollisionWall()) {
+		if (Collision()) {
 			position = tmpPosition;
 			direction = tmpDirection;
 			getTank();
@@ -128,7 +127,7 @@ namespace TankTrouble {
 		}
 		direction = direction / norm(direction);
 		getTank();
-		if (CollisionWall()) {
+		if (Collision()) {
 			position = tmpPosition;
 			direction = tmpDirection;
 			getTank();
@@ -152,12 +151,7 @@ namespace TankTrouble {
 
 		bullets--;
 
-		{
-			std::unique_lock<std::mutex> lock(bpMutex);
-			bulletPool.emplace_back(std::make_shared<bullet>(id, controller, bpos, direction, size, BLACK));
-		}
-
-		bpCv.notify_one();
+		bulletPool.emplace_back(std::make_shared<bullet>(id, controller, bpos, direction, size, BLACK));
 
 	}
 
@@ -172,32 +166,49 @@ namespace TankTrouble {
 		Polygon(hdcMem, toPOINT(barrel, 4), 4);
 	}
 
-	bool Tank::CollisionWall() const {
+	bool Tank::Collision() const {
 		for (int i = 0;i < 4;i++) {
+			for (auto& Tank : TankPool) {
+				if (Tank->getId() == id) {
+					continue;
+				}
+				if (itsPolPol(barrel, 4, Tank->barrel, 4)) {
+					return true;
+				}
+				if (itsPolPol(body, 4, Tank->body, 4)) {
+					return true;
+				}
+                if (itsPolPol(barrel, 4, Tank->body, 4)) {
+					return true;
+				}
+                if (itsPolPol(body, 4, Tank->barrel, 4)) {
+					return true;
+				}
+			}
 			for (auto& wall : WallPool) {
-				if (IntersectSegSeg(barrel[i], barrel[(i + 1) % 4],
+				if (itsSegSeg(barrel[i], barrel[(i + 1) % 4],
 					wall->LeftUp, wall->LeftDown))
 					return true;
-				if (IntersectSegSeg(barrel[i], barrel[(i + 1) % 4],
+				if (itsSegSeg(barrel[i], barrel[(i + 1) % 4],
 					wall->RightUp, wall->RightDown))
 					return true;
-				if (IntersectSegSeg(barrel[i], barrel[(i + 1) % 4],
+				if (itsSegSeg(barrel[i], barrel[(i + 1) % 4],
 					wall->LeftUp, wall->RightUp))
 					return true;
-				if (IntersectSegSeg(barrel[i], barrel[(i + 1) % 4],
+				if (itsSegSeg(barrel[i], barrel[(i + 1) % 4],
 					wall->LeftDown, wall->RightDown))
 					return true;
 
-				if (IntersectSegSeg(body[i], body[(i + 1) % 4],
+				if (itsSegSeg(body[i], body[(i + 1) % 4],
 					wall->LeftUp, wall->LeftDown))
 					return true;
-				if (IntersectSegSeg(body[i], body[(i + 1) % 4],
+				if (itsSegSeg(body[i], body[(i + 1) % 4],
 					wall->RightUp, wall->RightDown))
 					return true;
-				if (IntersectSegSeg(body[i], body[(i + 1) % 4],
+				if (itsSegSeg(body[i], body[(i + 1) % 4],
 					wall->LeftUp, wall->RightUp))
 					return true;
-				if (IntersectSegSeg(body[i], body[(i + 1) % 4],
+				if (itsSegSeg(body[i], body[(i + 1) % 4],
 					wall->LeftDown, wall->RightDown))
 					return true;
 			}
@@ -213,57 +224,65 @@ namespace TankTrouble {
 		return controller;
 	}
 
+	point Tank::getposition() const {
+		return position;
+	}
+
+	void Tank::getGridPosition(){
+		this->pos = {
+			(int)((position.y - UpWall) / yGap) + 1,
+			(int)((position.x - LeftWall) / xGap) + 1
+		};
+		
+		return ;
+	}
+
 	void Tank::setColor(COLORREF newColor) {
 		color = newColor;
 	}
 
 	void TankControl() {
 		while (Running) {
-			for (auto& Tank : TankPool) {
-				if (Tank->getController() == PLAYER) {
-					PlayerControl(Tank.get());
-				}
-				else {
-					ComputerControl(Tank.get());
+			{
+				std::unique_lock<std::shared_mutex> lock(tpMutex);
+
+				for (auto& Tank : TankPool) {
+					if (Tank == nullptr) return;
+
+					//没有任何指令
+					if (!Tank->isForward && !Tank->isBackward &&
+						!Tank->isLeft && !Tank->isRight && !Tank->isAttack)
+						continue;
+
+					if (Tank->isAttack) {
+						Tank->attack();
+					}
+					if (Tank->isForward && !Tank->isBackward) {
+						Tank->forward();
+					}
+					if (!Tank->isForward && Tank->isBackward) {
+						Tank->backwards();
+					}
+					if (Tank->isLeft && !Tank->isRight) {
+						Tank->left();
+					}
+					if (!Tank->isLeft && Tank->isRight) {
+						Tank->right();
+					}
+
+					Tank->getGridPosition();
+
+					HWND hwnd = FindWindow(L"TankTrouble", nullptr);
+					if (hwnd) {
+						InvalidateRect(hwnd, nullptr, TRUE);
+					}
+
 				}
 			}
-
+			
 			std::this_thread::sleep_for(std::chrono::milliseconds(40));
 
 		}
-	}
-
-	void PlayerControl(Tank* Player) {
-		if (Player == nullptr) return;
-
-		//没有任何指令
-		if (!Player->isForward && !Player->isBackward &&
-			!Player->isLeft && !Player->isRight && !Player->isAttack)
-			return;
-
-		if (Player->isAttack) {
-			Player->attack();
-		}
-		if (Player->isForward && !Player->isBackward) {
-			Player->forward();
-		}
-		if (!Player->isForward && Player->isBackward) {
-			Player->backwards();
-		}
-		if (Player->isLeft && !Player->isRight) {
-			Player->left();
-		}
-		if (!Player->isLeft && Player->isRight) {
-			Player->right();
-		}
-		HWND hwnd = FindWindow(L"TankTrouble", nullptr);
-		if (hwnd) {
-			InvalidateRect(hwnd, nullptr, TRUE);
-		}
-	}
-
-	void ComputerControl(Tank* Computer) {
-
 	}
 
 }

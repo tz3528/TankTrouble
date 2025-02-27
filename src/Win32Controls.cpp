@@ -3,6 +3,21 @@
 
 namespace TankTrouble {
 
+	//按钮
+	HWND hwndButtonSingleGame;
+	HWND hwndButtonOnlineGame;
+	HWND hwndButtonCampaign;
+	HWND hwndButtonBeginGame;
+	HWND hwndButtonBack;
+	HWND hwndRadioGroupPlayerNumber[10];
+	HWND hwndRadioGroupMapType[10];
+	HWND hwndRadioGroupTankColor[10];
+
+	//文本框
+	HWND hwndEditPlayerNumber;
+	HWND hwndEditMapType;
+	HWND hwndEditTankColor;
+
 	HFONT hFont = CreateFont(
 		25, 0,                      // 字体高度和宽度
 		0, 0,                       // 文字角度和基线角度
@@ -15,9 +30,63 @@ namespace TankTrouble {
 		L"Arial"                   // 字体名称
 	);
 
-	
+	void menuShow(HWND hwnd) {
+		ShowWindow(hwndButtonSingleGame, SW_SHOW);
+		ShowWindow(hwndButtonOnlineGame, SW_SHOW);
+		ShowWindow(hwndButtonCampaign, SW_SHOW);
+	}
 
-	
+	void menuHide(HWND hwnd) {
+		ShowWindow(hwndButtonSingleGame, SW_HIDE);
+		ShowWindow(hwndButtonOnlineGame, SW_HIDE);
+		ShowWindow(hwndButtonCampaign, SW_HIDE);
+	}
+
+	void selectionShow(HWND hwnd) {
+		for (int i = 0;i < MAX_PLAYER;i++) {
+			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_SHOW);
+		}
+		ShowWindow(hwndEditPlayerNumber, SW_SHOW);
+
+		for (int i = 0;i < 3;i++) {
+			ShowWindow(hwndRadioGroupMapType[i], SW_SHOW);
+		}
+		ShowWindow(hwndEditMapType, SW_SHOW);
+
+		for (int i = 0;i < 5;i++) {
+			ShowWindow(hwndRadioGroupTankColor[i], SW_SHOW);
+		}
+		ShowWindow(hwndEditTankColor, SW_SHOW);
+	}
+
+	void selectionHide(HWND hwnd) {
+		ShowWindow(hwndButtonBeginGame, SW_HIDE);
+		ShowWindow(hwndButtonBack, SW_HIDE);
+
+		for (int i = 0;i < MAX_PLAYER;i++) {
+			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_HIDE);
+			if (SendMessage(hwndRadioGroupPlayerNumber[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+				computers = GetDlgCtrlID(hwndRadioGroupPlayerNumber[i]) - NO_PLAYER;
+			}
+		}
+		ShowWindow(hwndEditPlayerNumber, SW_HIDE);
+
+		for (int i = 0;i < 3;i++) {
+			ShowWindow(hwndRadioGroupMapType[i], SW_HIDE);
+			if (SendMessage(hwndRadioGroupMapType[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+				MapSize = GetDlgCtrlID(hwndRadioGroupMapType[i]);
+			}
+		}
+		ShowWindow(hwndEditMapType, SW_HIDE);
+
+		for (int i = 0;i < 5;i++) {
+			ShowWindow(hwndRadioGroupTankColor[i], SW_HIDE);
+			if (SendMessage(hwndRadioGroupTankColor[i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+				PlayerColor = GetDlgCtrlID(hwndRadioGroupTankColor[i]);
+			}
+		}
+		ShowWindow(hwndEditTankColor, SW_HIDE);
+	}
 
 	void CreateRadioGroupHorizontal(
 		HWND hwnd, int x, int y, int width, int height,

@@ -42,22 +42,27 @@ namespace TankTrouble {
 	static int EditHeight = 30;
 
 	//按钮
-	static HWND hwndButtonSingleGame;
-	static HWND hwndButtonOnlineGame;
-	static HWND hwndButtonCampaign;
-	static HWND hwndButtonBeginGame;
-	static HWND hwndButtonBack;
-	static HWND hwndRadioGroupPlayerNumber[10];
-	static HWND hwndRadioGroupMapType[10];
-	static HWND hwndRadioGroupTankColor[10];
+	extern HWND hwndButtonSingleGame;
+	extern HWND hwndButtonOnlineGame;
+	extern HWND hwndButtonCampaign;
+	extern HWND hwndButtonBeginGame;
+	extern HWND hwndButtonBack;
+	extern HWND hwndRadioGroupPlayerNumber[10];
+	extern HWND hwndRadioGroupMapType[10];
+	extern HWND hwndRadioGroupTankColor[10];
 
 	//文本框
-	static HWND hwndEditPlayerNumber;
-	static HWND hwndEditMapType;
-	static HWND hwndEditTankColor;
+	extern HWND hwndEditPlayerNumber;
+	extern HWND hwndEditMapType;
+	extern HWND hwndEditTankColor;
 
 	//字体对象
     extern HFONT hFont;
+
+	void menuShow(HWND hwnd);
+	void menuHide(HWND hwnd);
+	void selectionShow(HWND hwnd);
+	void selectionHide(HWND hwnd);
 
 	/*
 	* 用于生成一组水平方向排列的单选按钮

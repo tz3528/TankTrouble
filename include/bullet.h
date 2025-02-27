@@ -2,19 +2,20 @@
 #define BULLET_H
 
 #include "Object.h"
+#include "pch.h"
 
 #include <mutex>
 #include <list>
 #include <memory>
 
-constexpr double SMALL_MAP_STEP = 3;
+constexpr double SMALL_MAP_STEP = 4;
 constexpr double MID_MAP_STEP = 2;
 constexpr double BIG_MAP_STEP = 1;
 
+using std::list;
+
 namespace TankTrouble
 {
-    extern std::mutex bpMutex;
-    extern std::condition_variable bpCv;
 
     class bullet : public Object, public std::enable_shared_from_this<bullet>
     {
@@ -26,10 +27,12 @@ namespace TankTrouble
         int getLife() const;
         int getController() const;
         int getId() const;
+        void getTrack();
 
         void draw(HDC hdcMem) override;
         void move();
 
+        Segment TrackSegment;
 
     private:
         int id, controller, life;
@@ -38,7 +41,7 @@ namespace TankTrouble
 
     void bulletPoolUpdate();
 
-    extern std::list<std::shared_ptr<bullet>> bulletPool;
+    extern list<std::shared_ptr<bullet>> bulletPool;
 
 };
 

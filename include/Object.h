@@ -1,9 +1,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <windows.h>
-
-#include "point.h"
+#include "geometry.h"
 
 namespace TankTrouble {
 	class Object
@@ -11,8 +9,9 @@ namespace TankTrouble {
 	public:
 		Object(point position, point direction, COLORREF color);
 		virtual void draw(HDC hdcMem) = 0;
-	protected:
+
 		point position, direction;
+	protected:
 		COLORREF color;
 	};
 }

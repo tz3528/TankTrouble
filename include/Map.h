@@ -1,15 +1,15 @@
 #ifndef WALL_H
 #define WALL_H
 
-#include "point.h"
+#include "geometry.h"
 
-#include <list>
+#include <vector>
 #include <memory>
 #include <Windows.h>
 #include <random>
 
-using std::list, std::shared_ptr, std::pair;
-using std::shuffle, std::random_device, std::mt19937;
+using std::vector, std::shared_ptr, std::pair;
+using std::shuffle, std::random_device, std::mt19937, std::uniform_int_distribution;
 
 namespace TankTrouble
 {
@@ -41,28 +41,31 @@ namespace TankTrouble
 
 	const double ConnectionProbability = 1.0 / 3;
 
-	static random_device rd;
+	extern random_device rd;
+	extern mt19937 gen;
+	extern uniform_int_distribution<> IntervalRN;
 
 	/*位置结构体
 	* 将原地图进行栅格化
 	* 每个格的位置用其所在行和列表示
 	*/
-	struct position {
+	struct GridPosition {
 		int row, column;
 	};
 
-	static int MapSize = SMALL_MAP;
-	static int Row, Column;
-	static int xGap, yGap;
-	static int beginNum;
+	extern int MapSize;
+	extern int Row, Column;
+	extern int permutation[110];
+	extern int xGap, yGap;
+	extern vector<shared_ptr<Wall>> WallPool;
+	extern vector<vector<int>> edge;
 
-	extern list<shared_ptr<Wall>> WallPool;
-
-	int PtoN(position pos);
-    position NtoP(int num);
+	int PtoN(GridPosition pos);
+	GridPosition NtoP(int num);
 	int square(int x);
+	point getCentrePoint(GridPosition pos);
 
-	void addWall(position a, position b);
+	void addWall(GridPosition a, GridPosition b);
 	void GenerateMap(int mapSize);
 	
 }

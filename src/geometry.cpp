@@ -1,8 +1,8 @@
-#include "point.h"
+#include "geometry.h"
 
 #include <stdexcept>
 
-using std::min, std::max;
+using std::min, std::max, std::swap;
 
 namespace TankTrouble {
 
@@ -36,11 +36,18 @@ namespace TankTrouble {
 		return abs(this->x - other.x) < eps && abs(this->y - other.y) < eps;
 	}
 
+	int point::quad() {
+		if (x > 0 && y >= 0) return 1;if (x <= 0 && y > 0) return 2;
+		if (x < 0 && y <= 0) return 3;return 4;
+	}
+
 	point point::normalVector() const {
 		return point(-this->y / norm(*this), this->x / norm(*this));
 	}
 
 	point::~point() {}
+
+	
 
 	double distPointPoint(const point u, const point v) {
 		return sqrt((u.x - v.x) * (u.x - v.x) + (u.y - v.y) * (u.y - v.y));
@@ -104,11 +111,41 @@ namespace TankTrouble {
 		return sqrt((u.x - px) * (u.x - px) + (u.y - py) * (u.y - py));
 	}
 	//判断线段ab与线段cd是否相交
-	bool IntersectSegSeg(const point a, const point b, const point c, const point d) {
+	bool itsSegSeg(const point a, const point b, const point c, const point d) {
 		point u = b - a;
 		point v = d - c;
 		if (((c - a) ^ u) * ((d - a) ^ u) <= 0 && ((a - c) ^ v) * ((b - c) ^ v) <= 0) return true;
 		return false;
+	}
+
+	bool itsPolPol(const point* a, const int na, const point* b, const int nb){
+		for (int i = 1;i < na;i++) {
+			for (int j = 1;j < nb;j++) {
+				if (itsSegSeg(a[i - 1], a[i], b[j - 1], b[j])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	line::line(point p, point q) {
+		A = p.y - q.y;B = q.x - p.x;C = p.x * q.y - q.x * p.y;
+		//保证u、v两点逆时针排列
+		if ((p ^ q) < 0) swap(p, q);
+		u = p;v = q - p;
+	}
+
+	//求两直线的交点
+	point itsLineLine(line l1, line l2) {
+		//一般方程写法
+		//point p;
+		//double k = l1.A * l2.B - l1.B * l2.A;
+		//p.x = -(l1.C * l2.B - l1.B * l2.C) / k;
+		//p.y = -(l1.A * l2.C - l1.C * l2.A) / k;
+		//return p;
+		//向量写法
+		return l1.u+l1.v*((l2.v^(l1.u-l2.u))/((l1.v^(l2.v))));
 	}
 
 }

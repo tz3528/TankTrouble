@@ -25,4 +25,13 @@ include_directories("${CMAKE_SOURCE_DIR}/include")
 add_executable(TankTrouble WIN32 ${MAIN_SRC})
 
 # 链接 Windows 库
-target_link_libraries(TankTrouble PRIVATE gdi32 user32 kernel32)
+target_link_libraries(TankTrouble PRIVATE gdi32 user32 kernel32 ws2_32)
+
+# 静态链接运行时库
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+
+# 配置预编译头文件
+target_precompile_headers(TankTrouble PRIVATE "${CMAKE_SOURCE_DIR}/include/pch.h")
+
+

@@ -10,10 +10,21 @@ using std::swap, std::invalid_argument;
 using std::unordered_set,std::vector;
 using std::uniform_real_distribution;
 using std::make_shared;
+using std::sort, std::copy;
 
 namespace TankTrouble {
-    
-    list<shared_ptr<Wall>> WallPool;
+
+    int MapSize;
+    int Row, Column;
+    int permutation[110];
+    int xGap, yGap;
+
+    vector<shared_ptr<Wall>> WallPool;
+    vector<vector<int>> edge(110);
+
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> IntervalRN(0, 3);
 
     Wall::Wall(point u, point v, int size) {
         if (u == v) {
@@ -56,11 +67,11 @@ namespace TankTrouble {
         Rectangle(hdcMem, (int)LeftUp.x, (int)LeftUp.y, (int)RightDown.x, (int)RightDown.y);
     }
 
-    int PtoN(position pos){
+    int PtoN(GridPosition pos){
         return (pos.row - 1) * Column + pos.column;
     }
 
-    position NtoP(int num){
+    GridPosition NtoP(int num){
         return {(num - 1) / Column + 1, (num - 1) % Column + 1};
     }
 
@@ -68,7 +79,14 @@ namespace TankTrouble {
         return x*x;
     }
 
-    void addWall(position a, position b){
+    point getCentrePoint(GridPosition pos) {
+        return point(
+            LeftWall + (pos.column - 1) * xGap + xGap / 2,
+            UpWall + (pos.row - 1) * yGap + yGap / 2
+        );
+    }
+
+    void addWall(GridPosition a, GridPosition b){
         point u, v;
         if (a.row == b.row) {
             if (a.column > b.column) {
@@ -96,23 +114,14 @@ namespace TankTrouble {
         if (mapSize == SMALL_MAP) {
             Row = SMALL_ROW;
             Column = SMALL_COLUMN;
-
-            beginNum = 4;
-
         }
         else if (mapSize == MEDIUM_MAP) {
             Row = MEDIUM_ROW;
             Column = MEDIUM_COLUMN;
-
-            beginNum = 4;
-
         }
         else if (mapSize == LARGE_MAP) {
             Row = LARGE_ROW;
             Column = LARGE_COLUMN;
-
-            beginNum = 4;
-
         }
 
         xGap = (RightWall - LeftWall) / Column;
@@ -135,7 +144,7 @@ namespace TankTrouble {
         unordered_set<int> set;
         vector<vector<int>>g(Row * Column + 1);
         for (int i = 1;i <= Row * Column;i++) {
-            position pos = NtoP(i);
+            GridPosition pos = NtoP(i);
             cnt = 0;
             //存储相邻的节点
             if(pos.row > 1)       tmp[cnt++] = PtoN({ pos.row - 1, pos.column });
@@ -143,8 +152,7 @@ namespace TankTrouble {
             if(pos.column > 1)       tmp[cnt++] = PtoN({ pos.row, pos.column - 1 });
             if(pos.column < Column)  tmp[cnt++] = PtoN({ pos.row, pos.column + 1 });
             //将这些节点随机排序，使得能够以随机顺序访问
-            mt19937 f(rd());
-            shuffle(tmp, tmp + cnt, f);
+            shuffle(tmp, tmp + cnt, gen);
             d[i] = cnt;
             for (int j = 0;j < cnt;j++) {
                 g[i].push_back(tmp[j]);
@@ -166,9 +174,8 @@ namespace TankTrouble {
                     continue;
                 }
                 //随机一个概率
-                mt19937 p(rd());
                 uniform_real_distribution<double> dis(0.0, 1.0);
-                double probability = dis(p);
+                double probability = dis(gen);
                 if (square(g[now].size()) * square(g[v].size()) * probability <=
                     square(d[now]) * square(d[v])) {
                     /*这里要先删边再进行下一层的dfs
@@ -216,9 +223,20 @@ namespace TankTrouble {
         for (int i = 1;i < Row * Column;i++) {
             dfs(dfs,i);
         }
-
+        
         cnt = 0;
         check(check, 1);
+
+        
+
+        for (int i = 1;i <= Row * Column;i++) {
+            for (auto v : g[i]) {
+                if (set.find((i << 5) | v) != set.end()) {
+                    edge[i].emplace_back(v);
+                }
+            }
+        }
+
         for (int i = 1;i <= Row * Column;i++) {
             for (auto v : g[i]) {
                 if (set.find((i << 5) | v) != set.end()) {
@@ -229,7 +247,16 @@ namespace TankTrouble {
                 set.insert( ( v << 5 ) | i);
             }
         }
+        /*所有的墙按照x坐标排序，以便后面进行二分查找
+        * 虽然说墙最多只有100左右
+        */
+        sort(WallPool.begin(), WallPool.end(), [](const shared_ptr<Wall>& a, const shared_ptr<Wall>& b) {
+            return  a->LeftUp.x == b->LeftUp.x ? 
+                    a->LeftUp.y < b->LeftUp.y :
+                    a->LeftUp.x < b->LeftUp.x;
+        });
         
+        delete[] vis;
         delete[] dfn;
         delete[] d;
     }
