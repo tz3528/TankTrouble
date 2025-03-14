@@ -1,9 +1,9 @@
 #include "Window.h"
 
+
 namespace TankTrouble
 {
 	ThreadPool threadPool(10);
-
 	std::mutex uiMutex;
 	std::condition_variable uiCv;
 	bool update;
@@ -211,6 +211,7 @@ namespace TankTrouble
 			GameMode = SINGLE_GAME;
 			break;
 		case ONLINE_GAME:
+			selectGameMode(hwnd);
 			GameMode = ONLINE_GAME;
 			break;
 		case CAMPAIGN:
@@ -221,11 +222,12 @@ namespace TankTrouble
 			switch (GameMode) 
 			{
 			case SINGLE_GAME:
+				threadPool.addTask(gameLoop, hwnd);
 				singleGameInit();
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
 				break;
 			case ONLINE_GAME:
-				onlineGameInit();
+				
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
 				break;
 			case CAMPAIGN:
@@ -371,7 +373,7 @@ namespace TankTrouble
 	}
 
 	void gameLoop(HWND hwnd) {
-		while (1) {
+		while (Running) {
 			// 标记整个窗口区域为无效，触发 WM_PAINT 消息
 			InvalidateRect(hwnd, NULL, FALSE);
 
@@ -424,9 +426,10 @@ namespace TankTrouble
 
 		Running = true;
 
+		onlineGameInit(hwnd);
+
 		threadPool.addTask(bulletPoolUpdate);
 		threadPool.addTask(TankControl);
-		threadPool.addTask(gameLoop, hwnd);
 
 		while (true) {
 			if (PeekMessage(&message, nullptr, 0, 0, PM_NOREMOVE)) {
@@ -435,7 +438,7 @@ namespace TankTrouble
 					DispatchMessage(&message);
 				}
 				else {
-					return 0;
+					break;
 				}
 			}
 			else {
@@ -445,12 +448,13 @@ namespace TankTrouble
 		/*这里停掉线程
 		* 避免提前释放了资源,造成访问野指针
 		*/
+
 		Running = false;
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		// 释放资源
-		for (auto& tank : TankPool) {
-			tank.reset();
+		for (auto& Tank : TankPool) {
+			Tank.reset();
 		}
 		TankPool.clear();
 

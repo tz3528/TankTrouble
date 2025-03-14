@@ -1,4 +1,4 @@
-#include "AI.h"
+#include "SingleGame/AI.h"
 #include <cstdio>
 typedef pair<int, int> PII;
 
@@ -19,11 +19,6 @@ namespace TankTrouble
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(30));
         }
-        HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-        char a[256] = { 0 };
-        sprintf_s(a, sizeof(a), "%d %d\n", Computer->isLife, Running);
-        WriteConsoleA(g_hOutput, a, (DWORD)strlen(a), nullptr, nullptr);
-
     }
 
     vector<int> JudgmentMove(shared_ptr<Tank> Computer) {
@@ -98,11 +93,6 @@ namespace TankTrouble
         point tmp = getCentrePoint(NtoP(path.back())) - Computer->getposition();
         dir = dir + tmp * path.size() / norm(tmp);
         
-        HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-        char a[256] = { 0 };
-        sprintf_s(a, sizeof(a), "%f %f %f %f\n", getCentrePoint(NtoP(path.back())).x, getCentrePoint(NtoP(path.back())).y, dir.x, dir.y);
-        WriteConsoleA(g_hOutput, a, (DWORD)strlen(a), nullptr, nullptr);
-
         /*通过点乘和叉积判断最终加权方向，
         * 分别得到前后和左右方向上的选择
         */

@@ -1,4 +1,4 @@
-#include "Tank.h"
+﻿#include "Tank.h"
 
 #include <graphics.h>
 #include <windows.h>
@@ -178,10 +178,10 @@ namespace TankTrouble {
 				if (itsPolPol(body, 4, Tank->body, 4)) {
 					return true;
 				}
-                if (itsPolPol(barrel, 4, Tank->body, 4)) {
+				if (itsPolPol(barrel, 4, Tank->body, 4)) {
 					return true;
 				}
-                if (itsPolPol(body, 4, Tank->barrel, 4)) {
+				if (itsPolPol(body, 4, Tank->barrel, 4)) {
 					return true;
 				}
 			}
@@ -228,13 +228,13 @@ namespace TankTrouble {
 		return position;
 	}
 
-	void Tank::getGridPosition(){
+	void Tank::getGridPosition() {
 		this->pos = {
 			(int)((position.y - UpWall) / yGap) + 1,
 			(int)((position.x - LeftWall) / xGap) + 1
 		};
-		
-		return ;
+
+		return;
 	}
 
 	void Tank::setColor(COLORREF newColor) {
@@ -249,7 +249,7 @@ namespace TankTrouble {
 				for (auto& Tank : TankPool) {
 					if (Tank == nullptr) return;
 
-					//û���κ�ָ��
+					//Ã»ÓÐÈÎºÎÖ¸Áî
 					if (!Tank->isForward && !Tank->isBackward &&
 						!Tank->isLeft && !Tank->isRight && !Tank->isAttack)
 						continue;
@@ -279,7 +279,7 @@ namespace TankTrouble {
 
 				}
 			}
-			
+
 			std::this_thread::sleep_for(std::chrono::milliseconds(40));
 
 		}
