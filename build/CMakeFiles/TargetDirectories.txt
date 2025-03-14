@@ -1,3 +1,0 @@
-D:/C++/TankTrouble/build/CMakeFiles/TankTrouble.dir
-D:/C++/TankTrouble/build/CMakeFiles/ALL_BUILD.dir
-D:/C++/TankTrouble/build/CMakeFiles/ZERO_CHECK.dir

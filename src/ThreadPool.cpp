@@ -1,8 +1,7 @@
 #include "ThreadPool.h"
-#include "Tank.h"
-using namespace TankTrouble;
-ThreadPool::ThreadPool(int ThreadNumber) 
-    :stop(false){
+
+ThreadPool::ThreadPool(int ThreadNumber)
+    :stop(false) {
     for (int i = 0;i < ThreadNumber;++i) {
         threads.emplace_back([this] {
             while (1) {
@@ -20,9 +19,9 @@ ThreadPool::ThreadPool(int ThreadNumber)
 
                 lock.unlock();
                 task();
-               
+
             }
-            
+
             });
     }
 }

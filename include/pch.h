@@ -11,8 +11,9 @@
 #include <condition_variable>
 #include <shared_mutex>
 #include <list>
+#include <vector>
 
 using std::shared_lock, std::shared_mutex, std::unique_lock;
 using std::condition_variable;
-using std::list;
+using std::list,std::vector;
 
