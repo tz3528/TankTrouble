@@ -21,24 +21,6 @@ namespace TankTrouble {
 #define MAP_TYPE			0x2011
 #define TANK_COLOR			0x2012
 
-	class RoomWidget {
-	public:
-		RoomWidget() = default;
-		RoomWidget(
-			HWND hwnd,
-			int id,int MaxPlayers,int Players,
-			int x, int y
-		);
-
-		void Hide();
-        void Show();
-
-	private:
-		HWND hwndButtonJoin;
-		HWND hwndEditId;
-		HWND hwndEditPlayers;
-	};
-
 	//控件信息
 	struct ControlsInfo {
 		long id;
@@ -58,8 +40,6 @@ namespace TankTrouble {
     static int RadioButtonHeight = 50;
 	static int ButtonGap = 20;
 	static int EditHeight = 30;
-	static int RoomWidgetWidth = 200;
-    static int RoomWidgetHeight = 400;
 
 	//按钮
 	extern HWND hwndButtonSingleGame;

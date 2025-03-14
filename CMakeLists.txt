@@ -19,19 +19,6 @@ add_definitions("-DUNICODE" "-D_UNICODE")
 # 添加 EasyX s
 link_directories("${CMAKE_SOURCE_DIR}/lib")
 
-set(BOOST_ROOT "D:/C++/library/boost")
-set(BOOST_INCLUDE "D:/C++/library/boost/include")
-
-find_package(Boost REQUIRED COMPONENTS
-        thread
-)
-
-if(NOT BOOST_FOUND)
-    message("NOT found Boost")
-endif()
-
-include_directories(${BOOST_INCLUDE})
-
 file(GLOB_RECURSE MAIN_SRC "${CMAKE_SOURCE_DIR}/src/*.cpp")
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
@@ -47,5 +34,4 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 # 配置预编译头文件
 target_precompile_headers(TankTrouble PRIVATE "${CMAKE_SOURCE_DIR}/include/pch.h")
 
-#在这里根据名字boost_thread去寻找libboost_thread.a文件
-target_link_libraries(${PROJECT_NAME} ${BOOST_LIBRARIES})
+

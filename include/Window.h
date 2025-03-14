@@ -4,9 +4,9 @@
 #include "bullet.h"
 #include "Map.h"
 #include "Tank.h"
-#include "SingleGame/SingleGame.h"
-#include "OnlineGame/OnlineGame.h"
-#include "Campaign/Campaign.h"
+#include "GameMode/SingleGame.h"
+#include "GameMode/OnlineGame.h"
+#include "GameMode/Campaign.h"
 #include "Win32Controls.h"
 #include "ThreadPool.h"
 
@@ -65,8 +65,6 @@ namespace TankTrouble
 
 	void paintControls(HWND hwnd);
 	void paintGame(HWND hwnd);
-
-	void gameLoop(HWND hwnd);
 }
 
 #endif //WINDOW_Hs

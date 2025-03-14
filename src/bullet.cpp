@@ -71,16 +71,16 @@ namespace TankTrouble {
 			if ((tmp - a) * (tmp - b) > 0) return;
 			double len = distPointPoint(tmp, l1.u);
 			if (len < legth) {
-				v = tmp;
-				legth = len;
+                v = tmp;
+                legth = len;
 			}
-			};
+		};
 
 		for (auto& Wall : WallPool) {
 			f(Wall->LeftUp, Wall->LeftDown);
-			f(Wall->RightUp, Wall->RightDown);
-			f(Wall->LeftUp, Wall->RightUp);
-			f(Wall->LeftDown, Wall->LeftDown);
+            f(Wall->RightUp, Wall->RightDown);
+            f(Wall->LeftUp, Wall->RightUp);
+            f(Wall->LeftDown, Wall->LeftDown);
 		}
 
 		TrackSegment = Segment{ position, v };

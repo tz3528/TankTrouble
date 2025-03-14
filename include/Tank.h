@@ -53,7 +53,7 @@ namespace TankTrouble
         double movingStep, length, width;
         point tmpPosition, tmpDirection;
         const int attackInterval = 200;
-
+       
         std::chrono::steady_clock::time_point lastAttack;
     };
 

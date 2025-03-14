@@ -1,9 +1,9 @@
-#include "SingleGame/SingleGame.h"
+#include "GameMode/SingleGame.h"
 #include "Map.h"
 #include "Tank.h"
 #include "bullet.h"
 #include "Window.h"
-#include "SingleGame/AI.h"
+#include "AI.h"
 
 using std::make_shared;
 

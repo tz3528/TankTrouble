@@ -26,7 +26,7 @@ public:
 		condition.notify_one();
 	}
 
-
+	
 
 private:
 	std::vector<std::thread> threads;
