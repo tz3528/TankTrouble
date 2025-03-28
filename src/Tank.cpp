@@ -241,48 +241,44 @@ namespace TankTrouble {
 		color = newColor;
 	}
 
-	void TankControl() {
-		while (Running) {
-			{
-				std::unique_lock<std::shared_mutex> lock(tpMutex);
+	int TankControl() {
+		{
+			std::unique_lock<std::shared_mutex> lock(tpMutex);
 
-				for (auto& Tank : TankPool) {
-					if (Tank == nullptr) return;
+			for (auto& Tank : TankPool) {
+				if (Tank == nullptr) return;
 
-					//Ã»ÓÐÈÎºÎÖ¸Áî
-					if (!Tank->isForward && !Tank->isBackward &&
-						!Tank->isLeft && !Tank->isRight && !Tank->isAttack)
-						continue;
+				if (!Tank->isForward && !Tank->isBackward &&
+					!Tank->isLeft && !Tank->isRight && !Tank->isAttack)
+					continue;
 
-					if (Tank->isAttack) {
-						Tank->attack();
-					}
-					if (Tank->isForward && !Tank->isBackward) {
-						Tank->forward();
-					}
-					if (!Tank->isForward && Tank->isBackward) {
-						Tank->backwards();
-					}
-					if (Tank->isLeft && !Tank->isRight) {
-						Tank->left();
-					}
-					if (!Tank->isLeft && Tank->isRight) {
-						Tank->right();
-					}
-
-					Tank->getGridPosition();
-
-					HWND hwnd = FindWindow(L"TankTrouble", nullptr);
-					if (hwnd) {
-						InvalidateRect(hwnd, nullptr, TRUE);
-					}
-
+				if (Tank->isAttack) {
+					Tank->attack();
 				}
+				if (Tank->isForward && !Tank->isBackward) {
+					Tank->forward();
+				}
+				if (!Tank->isForward && Tank->isBackward) {
+					Tank->backwards();
+				}
+				if (Tank->isLeft && !Tank->isRight) {
+					Tank->left();
+				}
+				if (!Tank->isLeft && Tank->isRight) {
+					Tank->right();
+				}
+
+				Tank->getGridPosition();
+
+				HWND hwnd = FindWindow(L"TankTrouble", nullptr);
+				if (hwnd) {
+					InvalidateRect(hwnd, nullptr, TRUE);
+				}
+
 			}
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(40));
-
 		}
+		if (Running) return 40;
+		return 0;
 	}
 
 }

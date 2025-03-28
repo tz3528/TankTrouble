@@ -1,9 +1,10 @@
 #include "Window.h"
 
+TimerManager timerManager = TimerManager();
+ThreadPool threadPool = ThreadPool(10);
 
 namespace TankTrouble
 {
-	ThreadPool threadPool(10);
 	std::mutex uiMutex;
 	std::condition_variable uiCv;
 	bool update;
@@ -227,13 +228,16 @@ namespace TankTrouble
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
 				break;
 			case ONLINE_GAME:
-				
+				threadPool.addTask(onlineGameInit,hwnd);
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
 				break;
 			case CAMPAIGN:
 				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CampaignWndProc);
 				break;
 			}
+			ShowWindow(hwndButtonBeginGame, SW_HIDE);
+			ShowWindow(hwndButtonBack, SW_HIDE);
+			InvalidateRect(hwnd, nullptr, TRUE);
 			return ;
 		case BACK:
 			repickMode(hwnd);
@@ -426,10 +430,17 @@ namespace TankTrouble
 
 		Running = true;
 
-		onlineGameInit(hwnd);
-
-		threadPool.addTask(bulletPoolUpdate);
-		threadPool.addTask(TankControl);
+		int cnt = 0;
+		timerManager.addTask(0x3f3f, 200, [&]() {
+			cnt++;
+			char tmp[256] = { 0 };
+			sprintf_s(tmp, sizeof(tmp), "%d\n", cnt);
+			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
+			return 200;
+			});
+		
+		timerManager.addTask(0x3f3f00, 10, bulletPoolUpdate);
+		timerManager.addTask(0x3f3f01, 40, TankControl);
 
 		while (true) {
 			if (PeekMessage(&message, nullptr, 0, 0, PM_NOREMOVE)) {

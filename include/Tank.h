@@ -3,14 +3,12 @@
 
 #include "Object.h"
 #include "Map.h"
-#include "bullet.h"
 #include "Window.h"
-#include "geometry.h"
+#include "bullet.h"
 #include "pch.h"
 
 #include <thread>
 #include <chrono>
-#include <windows.h>
 
 constexpr int PLAYER = 0;
 constexpr int COMPUTER = 1;
@@ -65,7 +63,7 @@ namespace TankTrouble
     extern list<std::shared_ptr<Tank>> TankPool;
     extern shared_mutex tpMutex;
 
-    void TankControl();
+    int TankControl();
 }
 
 #endif // TANK_H

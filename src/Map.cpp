@@ -1,5 +1,4 @@
 #include "Map.h"
-#include "Window.h"
 
 #include <stdexcept>
 #include <algorithm>

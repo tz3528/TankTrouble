@@ -141,20 +141,18 @@ namespace TankTrouble {
 
 	}
 
-	void bulletPoolUpdate() {
-		while (Running) {
-			for (auto bullet = bulletPool.begin(); bullet != bulletPool.end(); ) {
-				(*bullet)->move();
-				if ((*bullet)->getLife() == 0) {
-					bullet = bulletPool.erase(bullet);
-				}
-				else {
-					bullet++;
-				}
+	int bulletPoolUpdate() {
+		for (auto bullet = bulletPool.begin(); bullet != bulletPool.end(); ) {
+			(*bullet)->move();
+			if ((*bullet)->getLife() == 0) {
+				bullet = bulletPool.erase(bullet);
 			}
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			else {
+				bullet++;
+			}
 		}
+		if (Running) return 10;
+		return 0;
 	}
 
 }

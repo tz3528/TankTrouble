@@ -39,7 +39,7 @@ namespace TankTrouble
         double radius, movingStep;
     };
 
-    void bulletPoolUpdate();
+    int bulletPoolUpdate();
 
     extern list<std::shared_ptr<bullet>> bulletPool;
 

@@ -1,6 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "pch.h"
 #include "bullet.h"
 #include "Map.h"
 #include "Tank.h"
@@ -9,6 +10,7 @@
 #include "Campaign/Campaign.h"
 #include "Win32Controls.h"
 #include "ThreadPool.h"
+#include "TimerManager.hpp"
 
 #include <graphics.h>
 #include <mutex>
@@ -18,6 +20,9 @@
 #include <iostream>
 
 using Microsoft::WRL::ComPtr;
+
+extern TimerManager timerManager;
+extern ThreadPool threadPool;
 
 namespace TankTrouble
 {
@@ -34,12 +39,8 @@ namespace TankTrouble
 #define SEVEN_PLAYER		(NO_PLAYER + 7)
 #define EIGHT_PLAYER		(NO_PLAYER + 8)
 
-	static int WindowWidth = 1280;
-	static int WindowHeight = 720;
+	
 
-	extern ThreadPool threadPool;
-	//边缘四面墙的坐标
-	extern int LeftWall, RightWall, UpWall, BottomWall;
 	extern HDC hdcMem;
 	extern HBITMAP hbmMem;
 	extern int Running;

@@ -10,12 +10,13 @@
 
 namespace TankTrouble
 {
-
-#define ROOM_LIST_INFO	    1
-#define ROOM_INFO			2
+//Socket–≈œ¢
+#define SOCKET_INFO         0xFF00
+#define SOCKET_heartbeat    (SOCKET_INFO + 0)
+#define ROOM_LIST_INFO	    (SOCKET_INFO + 1)
+#define ROOM_INFO			(SOCKET_INFO + 2)
 
 #define ROOM_NUMBER			5
-
 
 	struct RoomListInfo {
 		int id;

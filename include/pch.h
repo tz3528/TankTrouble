@@ -17,3 +17,14 @@ using std::shared_lock, std::shared_mutex, std::unique_lock;
 using std::condition_variable;
 using std::list,std::vector;
 
+namespace TankTrouble{
+
+	static int WindowWidth = 1280;
+	static int WindowHeight = 720;
+
+	//边缘四面墙的坐标
+	extern int LeftWall, RightWall, UpWall, BottomWall;
+
+}
+
+

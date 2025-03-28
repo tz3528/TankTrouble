@@ -30,6 +30,18 @@ namespace TankTrouble {
 		L"Arial"                   // 字体名称
 	);
 
+	HFONT RoomListFont = CreateFont(
+		15, 0,                      // 字体高度和宽度
+		0, 0,                       // 文字角度和基线角度
+		FW_NORMAL, FALSE, FALSE,    // 字体重量、斜体、下划线
+		FALSE, DEFAULT_CHARSET,     // 删除线和字符集
+		OUT_DEFAULT_PRECIS,        // 输出精度
+		CLIP_DEFAULT_PRECIS,       // 裁剪精度
+		DEFAULT_QUALITY,           // 输出质量
+		DEFAULT_PITCH | FF_SWISS,  // 字体间距和族
+		L"Arial"                   // 字体名称
+	);
+
 	void menuShow(HWND hwnd) {
 		ShowWindow(hwndButtonSingleGame, SW_SHOW);
 		ShowWindow(hwndButtonOnlineGame, SW_SHOW);
@@ -139,41 +151,80 @@ namespace TankTrouble {
 		int id, int MaxPlayers, int Players,
 		int x, int y)
 	{
+		HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		if (hEvent == NULL) {
+			throw std::runtime_error("Failed to create event");
+		}
+
+		WidgetInfo params = {
+			L"STATIC", L"",
+			WS_VISIBLE | WS_CHILD | SS_CENTER,
+			x, y, RoomWidgetWidth, RoomWidgetHeight,
+			hwnd, nullptr,
+			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+			(LPARAM)hEvent, nullptr
+		};
+
+		auto createWidget = [&](WidgetInfo& params, HWND& hwndControl) {
+			HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+			char tmp[256] = { 0 };
+			sprintf_s(tmp, sizeof(tmp), "Post\n");
+			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
+			PostMessage(hwnd, CREATE_WIDGET, 0, (LPARAM)&params);
+
+			if (WaitForSingleObject(hEvent, INFINITE) != WAIT_OBJECT_0) {
+				CloseHandle(hEvent);
+				throw std::runtime_error("Failed to create widget");
+			}
+			hwndControl = params.Widget;
+			if (hwndControl == NULL) {
+				CloseHandle(hEvent);
+				throw std::runtime_error("Failed to create widget");
+			}
+		};
+		
+		createWidget(params, hwndRoot);
+
 		wchar_t tmp[1024] = { 0 };
-        swprintf(tmp, L"房间ID:%d",id);
-		hwndEditId = CreateWindow(
+		swprintf(tmp, L"房间号:%d", id);
+ 		params = {
 			L"EDIT", tmp,
 			WS_VISIBLE | WS_CHILD | WS_BORDER | ES_CENTER,
-			x + RoomWidgetWidth / 2 - 120 / 2,
-			y + ButtonGap,
-			120, 30, hwnd, nullptr,
-			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
-		);
-		SendMessage(hwndEditId, WM_SETFONT, (WPARAM)hFont, TRUE);
+			RoomWidgetWidth / 2 - 150 / 2, 2 * ButtonGap,
+			150, 30, hwndRoot, nullptr,
+			(HINSTANCE)GetWindowLongPtr(hwndRoot, GWLP_HINSTANCE),
+			(LPARAM)hEvent, nullptr
+		};
+		createWidget(params, hwndEditId);
+		SendMessage(hwndEditId, WM_SETFONT, (WPARAM)RoomListFont, TRUE);
 		SendMessage(hwndEditId, EM_SETREADONLY, TRUE, 0);
 
-		hwndEditPlayers = CreateWindow(
+		swprintf(tmp, L"当前人数/最大人数:%d/%d", Players, MaxPlayers);
+		params = {
 			L"EDIT", tmp,
 			WS_VISIBLE | WS_CHILD | WS_BORDER | ES_CENTER,
-			x + RoomWidgetWidth / 2 - 120 / 2,
-			y + 2 * ButtonGap + 30,
-			120, 30, hwnd, nullptr,
-			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
-		);
-		SendMessage(hwndEditId, WM_SETFONT, (WPARAM)hFont, TRUE);
-		SendMessage(hwndEditId, EM_SETREADONLY, TRUE, 0);
+			RoomWidgetWidth / 2 - 150 / 2, 3 * ButtonGap + 30,
+			150, 30, hwndRoot, nullptr,
+			(HINSTANCE)GetWindowLongPtr(hwndRoot, GWLP_HINSTANCE),
+			(LPARAM)hEvent, nullptr
+		};
+		createWidget(params, hwndEditPlayers);
+		SendMessage(hwndEditPlayers, WM_SETFONT, (WPARAM)RoomListFont, TRUE);
+		SendMessage(hwndEditPlayers, EM_SETREADONLY, TRUE, 0);
 
-		hwndButtonJoin = CreateWindow(
-			L"BUTTON", L"加入房间",
+		swprintf(tmp, L"加入房间");
+		params = {
+			L"BUTTON", tmp,
 			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			x + RoomWidgetWidth / 2 - 120 / 2,
-			y + RoomWidgetWidth - ButtonGap - 30,
-			120, 30,
-			hwnd, (HMENU)id,
-			(HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr
-		);
-		SendMessage(hwndEditId, WM_SETFONT, (WPARAM)hFont, TRUE);
+			RoomWidgetWidth / 2 - 150 / 2, 5 * ButtonGap + 2 * 30,
+			150, 30, hwndRoot, nullptr,
+			(HINSTANCE)GetWindowLongPtr(hwndRoot, GWLP_HINSTANCE),
+			(LPARAM)hEvent, nullptr
+		};
+		createWidget(params, hwndButtonJoin);
+		SendMessage(hwndButtonJoin, WM_SETFONT, (WPARAM)RoomListFont, TRUE);
 
+		CloseHandle(hEvent);
 	}
 
 	void RoomWidget::Hide() {

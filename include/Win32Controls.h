@@ -5,6 +5,8 @@
 
 namespace TankTrouble {
 
+#define CREATE_WIDGET		0x3000
+
 //按钮的起始编号
 #define BUTTON_BEGIN		0x2000
 
@@ -21,6 +23,19 @@ namespace TankTrouble {
 #define MAP_TYPE			0x2011
 #define TANK_COLOR			0x2012
 
+	struct WidgetInfo {
+		wchar_t* type;
+		wchar_t* text;
+		int style;
+		int x,y;
+		int width,height;
+        HWND hwnd;
+		HMENU Menu;
+        HINSTANCE hInstance;
+		LPARAM iParam;
+		HWND Widget;
+	};
+
 	class RoomWidget {
 	public:
 		RoomWidget() = default;
@@ -34,6 +49,7 @@ namespace TankTrouble {
         void Show();
 
 	private:
+		HWND hwndRoot;
 		HWND hwndButtonJoin;
 		HWND hwndEditId;
 		HWND hwndEditPlayers;
@@ -59,7 +75,7 @@ namespace TankTrouble {
 	static int ButtonGap = 20;
 	static int EditHeight = 30;
 	static int RoomWidgetWidth = 200;
-    static int RoomWidgetHeight = 400;
+    static int RoomWidgetHeight = 300;
 
 	//按钮
 	extern HWND hwndButtonSingleGame;

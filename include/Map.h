@@ -1,6 +1,7 @@
-#ifndef WALL_H
-#define WALL_H
+#ifndef MAP_H
+#define MAP_H
 
+#include "pch.h"
 #include "geometry.h"
 
 #include <vector>
@@ -70,4 +71,4 @@ namespace TankTrouble
 	
 }
 
-#endif // WALL_H
+#endif // MAP_H

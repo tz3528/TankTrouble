@@ -4,16 +4,25 @@ namespace TankTrouble
 {
 	RoomWidget Room[5];
 	std::atomic<bool> selectRoom = false;
+	int fd;
 
 	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
+		WidgetInfo* params = (WidgetInfo*)lParam;
+		HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		char tmp[256] = { 0 };
+		
 		switch (message)
 		{
+		case WM_COMMAND:
+
+			break;
 		case WM_KEYDOWN:
 			break;
 		case WM_KEYUP:
 			break;
 		case WM_PAINT:
+			paintGame(hwnd);
 			break;
 		case WM_ERASEBKGND:
 		{
@@ -21,14 +30,37 @@ namespace TankTrouble
 		}
 		case WM_DESTROY:
 			PostQuitMessage(0);
+			closesocket(fd);
+			break;
+		case CREATE_WIDGET:
+			sprintf_s(tmp, sizeof(tmp), "message:%d\n", message);
+			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
+			if (params != nullptr) {
+				params->Widget = CreateWindow(
+					params->type, params->text, params->style,
+					params->x, params->y, params->width, params->height,
+					params->hwnd, (HMENU)params->Menu,
+					params->hInstance, nullptr
+				);
+				if (params->Widget == NULL) {
+					DWORD errorCode = GetLastError();
+					sprintf_s(tmp, sizeof(tmp), "CreateWindow failed with error: %lu\n", errorCode);
+					WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
+				}
+				if (params->iParam != 0) {
+					SetEvent((HANDLE)params->iParam); // 设置事件
+				}
+			}
 			break;
 		default:
 			return DefWindowProc(hwnd, message, wParam, lParam);
 		}
+
 		return 0;
 	}
 
 	int EstablishSocket() {
+
 		HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		char tmp[256] = { 0 };
 		sprintf_s(tmp, sizeof(tmp), "2\n");
@@ -45,7 +77,7 @@ namespace TankTrouble
 		struct sockaddr_in saddr;
 		saddr.sin_family = AF_INET;
 		saddr.sin_port = htons(6666);
-		inet_pton(AF_INET, "192.168.10.224", &saddr.sin_addr);
+		inet_pton(AF_INET, "192.168.131.224", &saddr.sin_addr);
 		int ret = connect(fd, (struct sockaddr*)&saddr, sizeof(saddr));
 		if (ret == -1) {
 			int errorCode = WSAGetLastError();
@@ -61,12 +93,11 @@ namespace TankTrouble
 	}
 
 	void onlineGameInit(HWND hwnd) {
-		
 		char tmp[256] = { 0 };
 		HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		sprintf_s(tmp, sizeof(tmp), "1\n");
 		WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
-
+		
 		//1.初始化网络库
 		WSADATA wsaData;
 		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -75,7 +106,7 @@ namespace TankTrouble
 
 		selectRoom = true;
 
-		int fd = EstablishSocket();
+		fd = EstablishSocket();
 
 		string init = toString(ROOM_LIST_INFO);
 		send(fd, init.c_str(), init.size(), 0);
@@ -84,7 +115,6 @@ namespace TankTrouble
 			int len = recv(fd, message, sizeof(message), 0);
 			if (len > 0) {
 				Dispatch(hwnd,fd,message,len);
-				
 			}
 			else if (len == 0) {
 				break;
@@ -103,7 +133,7 @@ namespace TankTrouble
 	}
 
 	int CtoI(const char*& str, int& len) {
-		len += 4;
+		len -= 4;
 		int sum = str[0] + (str[1] << 8) + (str[2] << 16) + (str[3] << 24);
 		str += 4;
 		return sum;
@@ -128,6 +158,9 @@ namespace TankTrouble
 
 		int gap = (WindowWidth - num * 200) / (num + 1);
 		int left = gap;
+
+		HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		char tmp[256] = { 0 };
 
 		for (int i = 0;i < num;i++) {
 			int id = CtoI(message,len);
