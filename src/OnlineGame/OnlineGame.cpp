@@ -35,8 +35,6 @@ namespace TankTrouble
 			closesocket(fd);
 			break;
 		case CREATE_WIDGET:
-			sprintf_s(tmp, sizeof(tmp), "message:%d\n", message);
-			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
 			if (params != nullptr) {
 				params->Widget = CreateWindow(
 					params->type, params->text, params->style,
@@ -110,9 +108,15 @@ namespace TankTrouble
 
 		fd = EstablishSocket();
 
-		string init = toString(ROOM_LIST_INFO);
-		send(fd, init.c_str(), init.size(), 0);
-
+		std::string init = toString(ROOM_LIST_INFO);
+		int result = send(fd, init.c_str(), init.size(), 0);
+		if (result == SOCKET_ERROR) {
+			int errorCode = WSAGetLastError();
+			// ¥¶¿Ì¥ÌŒÛ
+			sprintf_s(tmp, sizeof(tmp), "%d\n", errorCode);
+			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
+		}
+		
 		timerManager.addTask(SOCKET_HEARTBEAT, 5000, socket_heartbeat);
 
 		while (OnlineGame) {

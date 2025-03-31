@@ -167,9 +167,6 @@ namespace TankTrouble {
 
 		auto createWidget = [&](WidgetInfo& params, HWND& hwndControl) {
 			HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-			char tmp[256] = { 0 };
-			sprintf_s(tmp, sizeof(tmp), "Post\n");
-			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
 			PostMessage(hwnd, CREATE_WIDGET, 0, (LPARAM)&params);
 
 			if (WaitForSingleObject(hEvent, INFINITE) != WAIT_OBJECT_0) {

@@ -24,8 +24,8 @@ namespace TankTrouble {
 #define TANK_COLOR			0x2012
 
 	struct WidgetInfo {
-		wchar_t* type;
-		wchar_t* text;
+		const wchar_t* type;
+		const wchar_t* text;
 		int style;
 		int x,y;
 		int width,height;
@@ -58,7 +58,7 @@ namespace TankTrouble {
 	//控件信息
 	struct ControlsInfo {
 		long id;
-		wchar_t* text;
+		const wchar_t* text;
 	};
 	//本本框控件的信息
 	struct EditInfo {
