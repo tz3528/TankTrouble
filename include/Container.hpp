@@ -17,10 +17,7 @@ template <typename T>
 string toString(const T& t) {
     if constexpr (std::is_fundamental_v<T> || std::is_enum_v<T>) {
         std::string value;
-        const char* ptr = reinterpret_cast<const char*>(&t);
-        for (size_t i = 0; i < sizeof(T); ++i) {
-            value += static_cast<char>(ptr[i]);
-        }
+        memcpy(value.data(), std::bit_cast<const unsigned char*>(&t), sizeof(T));
         return value;
     }
     else {

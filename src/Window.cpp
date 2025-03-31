@@ -429,15 +429,6 @@ namespace TankTrouble
 		//WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
 
 		Running = true;
-
-		int cnt = 0;
-		timerManager.addTask(0x3f3f, 200, [&]() {
-			cnt++;
-			char tmp[256] = { 0 };
-			sprintf_s(tmp, sizeof(tmp), "%d\n", cnt);
-			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
-			return 200;
-			});
 		
 		timerManager.addTask(0x3f3f00, 10, bulletPoolUpdate);
 		timerManager.addTask(0x3f3f01, 40, TankControl);

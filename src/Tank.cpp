@@ -246,7 +246,7 @@ namespace TankTrouble {
 			std::unique_lock<std::shared_mutex> lock(tpMutex);
 
 			for (auto& Tank : TankPool) {
-				if (Tank == nullptr) return;
+				if (Tank == nullptr) continue;
 
 				if (!Tank->isForward && !Tank->isBackward &&
 					!Tank->isLeft && !Tank->isRight && !Tank->isAttack)

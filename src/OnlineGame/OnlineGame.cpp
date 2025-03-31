@@ -5,6 +5,8 @@ namespace TankTrouble
 	RoomWidget Room[5];
 	std::atomic<bool> selectRoom = false;
 	int fd;
+	bool OnlineGame = true;
+	bool SocketHeartbeat = true;
 
 	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
@@ -110,7 +112,10 @@ namespace TankTrouble
 
 		string init = toString(ROOM_LIST_INFO);
 		send(fd, init.c_str(), init.size(), 0);
-		while (true) {
+
+		timerManager.addTask(SOCKET_HEARTBEAT, 5000, socket_heartbeat);
+
+		while (OnlineGame) {
 			char message[1024] = { 0 };
 			int len = recv(fd, message, sizeof(message), 0);
 			if (len > 0) {
@@ -133,8 +138,8 @@ namespace TankTrouble
 	}
 
 	int CtoI(const char*& str, int& len) {
-		len -= 4;
-		int sum = str[0] + (str[1] << 8) + (str[2] << 16) + (str[3] << 24);
+		len += 4;
+		int sum = (unsigned char)str[0] | ((unsigned char)str[1] << 8) | ((unsigned char)str[2] << 16) | ((unsigned char)str[3] << 24);
 		str += 4;
 		return sum;
 	}
@@ -142,6 +147,9 @@ namespace TankTrouble
 	void Dispatch(HWND hwnd, int fd,const char* message,int len){
 		switch (MessageType(message,len))
 		{
+		case SOCKET_HEARTBEAT:
+			SocketHeartbeat = true;
+			break;
 		case ROOM_LIST_INFO:
 			updateRoomList(hwnd, message, len);
 			break;
@@ -151,6 +159,16 @@ namespace TankTrouble
 			break;
 		}
 		
+	}
+
+	int socket_heartbeat() {
+		if (!SocketHeartbeat) {
+			OnlineGame = false;
+			return 0;
+		}
+        string heartbeat = toString(SOCKET_HEARTBEAT);
+        send(fd, heartbeat.c_str(), heartbeat.size(), 0);
+		return 5000;
 	}
 
 	void updateRoomList(HWND hwnd,const char* message,int len) {

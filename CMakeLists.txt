@@ -11,7 +11,7 @@ endif()
 
 project("TankTrouble")
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Unicode±àÂë
 add_definitions("-DUNICODE" "-D_UNICODE")

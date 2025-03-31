@@ -8,7 +8,6 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
-#include <atomic>
 
 using std::set, std::unordered_map;
 using namespace std::chrono;
