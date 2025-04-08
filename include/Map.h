@@ -2,7 +2,6 @@
 #define MAP_H
 
 #include "pch.h"
-#include "geometry.h"
 
 #include <vector>
 #include <memory>

@@ -7,7 +7,7 @@
 #pragma comment(lib, "Winmm.lib")
 
 namespace TankTrouble {
-
+	
 	list<std::shared_ptr<Tank>> TankPool;
 	shared_mutex tpMutex;
 
@@ -39,7 +39,7 @@ namespace TankTrouble {
 	Tank::~Tank() {
 		PlaySoundW(L"res/Sound Effects/TankExplosion.wav", NULL, SND_FILENAME | SND_ASYNC);
 	}
-
+	
 	void Tank::getTank() {
 		body[0] = position + direction * length / 2 + direction.normalVector() * width / 2;
 		body[1] = position + direction * length / 2 - direction.normalVector() * width / 2;
@@ -50,7 +50,7 @@ namespace TankTrouble {
 		barrel[2] = position - direction * length / 6 - direction.normalVector() * width / 6;
 		barrel[3] = position - direction * length / 6 + direction.normalVector() * width / 6;
 	}
-
+	
 	void Tank::forward() {
 		tmpPosition = position;
 		tmpDirection = direction;
@@ -62,7 +62,7 @@ namespace TankTrouble {
 			getTank();
 		}
 	}
-
+	
 	void Tank::backwards() {
 		tmpPosition = position;
 		tmpDirection = direction;
@@ -74,7 +74,7 @@ namespace TankTrouble {
 			getTank();
 		}
 	}
-
+	
 	void Tank::left() {
 		tmpPosition = position;
 		tmpDirection = direction;
@@ -103,7 +103,7 @@ namespace TankTrouble {
 			getTank();
 		}
 	}
-
+	
 	void Tank::right() {
 		tmpPosition = position;
 		tmpDirection = direction;
@@ -150,9 +150,8 @@ namespace TankTrouble {
 		lastAttack = now;
 
 		bullets--;
-
+		unique_lock<std::shared_mutex> lock(bpMutex);
 		bulletPool.emplace_back(std::make_shared<bullet>(id, controller, bpos, direction, size, BLACK));
-
 	}
 
 	void Tank::addbullet() {

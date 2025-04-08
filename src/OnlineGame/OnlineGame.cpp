@@ -109,7 +109,7 @@ namespace TankTrouble
 		fd = EstablishSocket();
 
 		std::string init = toString(ROOM_LIST_INFO);
-		int result = send(fd, init.c_str(), init.size(), 0);
+		size_t result = send(fd, init.c_str(), init.size(), 0);
 		if (result == SOCKET_ERROR) {
 			int errorCode = WSAGetLastError();
 			// ¥¶¿Ì¥ÌŒÛ

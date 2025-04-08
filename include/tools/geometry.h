@@ -2,6 +2,7 @@
 #define POINT_H
 
 #include <math.h>
+#include <Windows.h>
 
 namespace TankTrouble
 {
@@ -36,31 +37,60 @@ namespace TankTrouble
         double x, y;
     };
 
-    //有向线段，其中u为起点，v为终点
+    /**
+     * @brief 有向线段，其中u为起点，v为终点
+     */
     struct Segment {
         point u, v;
     };
-    //射线，其中origin为起点，direction为方向向量
+    /**
+     * @brief 射线，其中origin为起点，direction为方向向量
+     */
     struct Ray {
         point origin, direction;
     };
 
     double distPointPoint(const point u, const point v);
+    /**
+     * @brief   获取向量的模长
+     * @param u 向量
+     * @return  模长
+     */
     double norm(const point u);
 
     POINT* toPOINT(const point* now, const int size);
 
     //点、线运算
 
-    //计算点集中x坐标的最小值
+    /**
+     * @brief           计算点集中x坐标的最小值
+     * @param points    点集
+     * @param n         点集的大小
+     * @return          x坐标的最小值
+     */
     double getMinX(const point* points, int n);
-    //计算点集中y坐标的最小值
+    /**
+     * @brief           计算点集中y坐标的最小值
+     * @param points    点集
+     * @param n         点集的大小
+     * @return          y坐标的最小值
+     */
     double getMinY(const point* points, int n);
-    //计算点集中x坐标的最大值
+    /**
+     * @brief           计算点集中x坐标的最大值
+     * @param points    点集
+     * @param n         点集的大小
+     * @return          x坐标的最大值
+     */
     double getMaxX(const point* points, int n);
-    //计算点集中y坐标的最大值
+    /**
+     * @brief           计算点集中y坐标的最大值
+     * @param points    点集
+     * @param n         点集的大小
+     * @return          y坐标的最大值
+     */
     double getMaxY(const point* points, int n);
-    //计算点u到现段vw的距离
+    //计算点u到线段vw的距离
     double distPointSeg(const point u, const point v, const point w);
     //判断线段ab与线段cd是否相交
     bool itsSegSeg(const point a, const point b, const point c, const point d);

@@ -6,13 +6,15 @@
 #include <string>
 #include <mutex>
 #include <boost/pfr/core.hpp>
+#include <shared_mutex>
 
-using std::list;
 using std::unordered_map;
 using std::string;
-using std::shared_mutex, std::unique_lock, std::shared_lock;
 using namespace boost;
 
+/**
+ * @brief 将任意数据结构按照属性序列化为基本类型，再将序列元素转换为字符串后拼接
+ */
 template <typename T>
 string toString(const T& t) {
     if constexpr (std::is_fundamental_v<T> || std::is_enum_v<T>) {
@@ -78,24 +80,24 @@ public:
 
     ~Container() = default;
 
-    typename list<T>::iterator begin() {
-        shared_lock<shared_mutex> lock(mutex);
+    typename std::list<T>::iterator begin() {
+        std::shared_lock<std::shared_mutex> lock(mutex);
         return data.begin();
     }
 
-    typename list<T>::iterator end() {
-        shared_lock<shared_mutex> lock(mutex);
+    typename std::list<T>::iterator end() {
+        std::shared_lock<std::shared_mutex> lock(mutex);
         return data.end();
     }
 
     void insert(const T& value) {
-        unique_lock<shared_mutex> lock(mutex);
+        std::unique_lock<std::shared_mutex> lock(mutex);
         auto it = data.insert(data.end(), value);
         index[value] = it;
     }
 
     void emplace_back(const T& value) {
-        unique_lock<shared_mutex> lock(mutex);
+        std::unique_lock<std::shared_mutex> lock(mutex);
         auto it = data.emplace(data.end(), value);
         index[value] = it;
     }
@@ -104,8 +106,8 @@ public:
         return data.back();
     }
 
-    typename list<T>::iterator  erase(const T& value) {
-        unique_lock<shared_mutex> lock(mutex);
+    typename std::list<T>::iterator  erase(const T& value) {
+        std::unique_lock<std::shared_mutex> lock(mutex);
         auto it = index.find(value);
         if (it != index.end()) {
             data.erase(it->second);
@@ -115,27 +117,30 @@ public:
     }
 
     bool empty() {
-        shared_lock<shared_mutex> lock(mutex);
+        std::shared_lock<std::shared_mutex> lock(mutex);
         return data.empty();
     }
 
     int size() {
-        shared_lock<shared_mutex> lock(mutex);
+        std::shared_lock<std::shared_mutex> lock(mutex);
         return data.size();
     }
 
     void clear() {
-        unique_lock<shared_mutex> lock(mutex);
+        std::unique_lock<std::shared_mutex> lock(mutex);
         data.clear();
         index.clear();
     }
 
-    shared_mutex& getMutex() {
+    std::shared_mutex& getMutex() {
         return mutex;
     }
-
+    /**
+     * @brief 将容器内容打包成字符串
+     * @return 一个字符串
+     */
     string toMessage() {
-        shared_lock<shared_mutex> lock(mutex);
+        std::shared_lock<std::shared_mutex> lock(mutex);
         string message;
         int length = data.size();
         message += toString(length);
@@ -146,8 +151,8 @@ public:
     }
 
 private:
-    shared_mutex mutex;
-    list<T> data;
-    unordered_map<T, typename list<T>::iterator, ContainerHash<T>, ContainerEqual<T>> index; // 使用自定义哈希函数
+    std::shared_mutex mutex;
+    std::list<T> data;
+    std::unordered_map<T, typename std::list<T>::iterator, ContainerHash<T>, ContainerEqual<T>> index; // 使用自定义哈希函数
 };
 

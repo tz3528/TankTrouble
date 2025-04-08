@@ -1,7 +1,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "geometry.h"
+#include "pch.h"
 
 namespace TankTrouble {
 	class Object

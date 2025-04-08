@@ -9,8 +9,6 @@
 #include "OnlineGame/OnlineGame.h"
 #include "Campaign/Campaign.h"
 #include "Win32Controls.h"
-#include "ThreadPool.h"
-#include "TimerManager.hpp"
 
 #include <graphics.h>
 #include <mutex>
@@ -18,6 +16,7 @@
 #include <wrl.h>
 #include <windows.h>
 #include <iostream>
+#include <filesystem>
 
 using Microsoft::WRL::ComPtr;
 

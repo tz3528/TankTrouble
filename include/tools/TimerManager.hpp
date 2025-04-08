@@ -12,6 +12,9 @@
 using std::set, std::unordered_map;
 using namespace std::chrono;
 
+/**
+ * @brief 定时任务结构
+ */
 struct TimerTask {
     int id;
     steady_clock::time_point exec_time;
@@ -25,6 +28,9 @@ struct TimerTask {
     }
 };
 
+/**
+ * @brief 定时任务管理器
+ */
 class TimerManager {
 public:
 
@@ -33,9 +39,15 @@ public:
     };
 
     ~TimerManager() {
-        running = false;
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            running = false;
+
+        }
         cv.notify_one();
-        work.join();
+        if (work.joinable()) {
+            work.join();
+        }
     }
 
     template<class F, class... Args>
@@ -61,6 +73,7 @@ private:
             std::unique_lock<std::mutex> lock(mutex);
             if (tasks.empty()) {
                 cv.wait(lock);
+                continue;
             }
 
             cv.wait_until(lock, tasks.begin()->exec_time);

@@ -166,7 +166,6 @@ namespace TankTrouble {
 		};
 
 		auto createWidget = [&](WidgetInfo& params, HWND& hwndControl) {
-			HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 			PostMessage(hwnd, CREATE_WIDGET, 0, (LPARAM)&params);
 
 			if (WaitForSingleObject(hEvent, INFINITE) != WAIT_OBJECT_0) {

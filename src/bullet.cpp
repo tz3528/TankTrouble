@@ -2,7 +2,6 @@
 #include "Window.h"
 #include "Map.h"
 #include "Tank.h"
-#include "geometry.h"
 
 #include <graphics.h>
 #include <memory>
@@ -11,6 +10,7 @@
 namespace TankTrouble {
 
 	list<std::shared_ptr<bullet>> bulletPool;
+	shared_mutex bpMutex;
 
 	bullet::bullet(int id, int controller, point position, point direction, int size, const COLORREF& color) :
 		Object(position, direction, color), radius(0), movingStep(0)
@@ -142,6 +142,7 @@ namespace TankTrouble {
 	}
 
 	int bulletPoolUpdate() {
+		unique_lock<shared_mutex> lock(bpMutex);
 		for (auto bullet = bulletPool.begin(); bullet != bulletPool.end(); ) {
 			(*bullet)->move();
 			if ((*bullet)->getLife() == 0) {
@@ -151,6 +152,7 @@ namespace TankTrouble {
 				bullet++;
 			}
 		}
+        lock.unlock();
 		if (Running) return 10;
 		return 0;
 	}

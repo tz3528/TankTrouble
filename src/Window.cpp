@@ -1,7 +1,9 @@
 #include "Window.h"
 
+auto exePath = std::filesystem::current_path();
 TimerManager timerManager = TimerManager();
 ThreadPool threadPool = ThreadPool(10);
+Monitor monitor = Monitor(exePath.string());
 
 namespace TankTrouble
 {
@@ -17,8 +19,11 @@ namespace TankTrouble
 
 	HANDLE g_hOutput = 0;
 
+	PAINTSTRUCT ps = { 0 };
 	HDC hdcMem;
 	HBITMAP hbmMem;
+	HBRUSH WhiteBrush = CreateSolidBrush(RGB(255, 255, 255));
+	HBRUSH BlackBrush = CreateSolidBrush(RGB(0, 0, 0));
 
 	LRESULT CALLBACK StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
@@ -323,7 +328,10 @@ namespace TankTrouble
 	}
 
 	void paintGame(HWND hwnd) {
-		PAINTSTRUCT ps = { 0 };
+
+		monitor.PerSecond(1000,THROUGHOUT,std::source_location::current());
+		monitor.BeginPerRun();
+		
 		HDC hdc = BeginPaint(hwnd, &ps);
 
 		// 创建兼容的内存设备上下文和位图
@@ -332,12 +340,10 @@ namespace TankTrouble
 		SelectObject(hdcMem, hbmMem);
 
 		// 填充背景为白色
-		HBRUSH whiteBrush = CreateSolidBrush(RGB(255, 255, 255));
-		HBRUSH oldBrush = (HBRUSH)SelectObject(hdcMem, whiteBrush);
+		
+		HBRUSH oldBrush = (HBRUSH)SelectObject(hdcMem, WhiteBrush);
 		RECT rect = { 0, 0, WindowWidth, WindowHeight };
-		FillRect(hdcMem, &rect, whiteBrush);
-		SelectObject(hdcMem, oldBrush);
-		DeleteObject(whiteBrush);
+		FillRect(hdcMem, &rect, WhiteBrush);
 
 		{
 			// 绘制坦克
@@ -348,14 +354,17 @@ namespace TankTrouble
 		}
 		
 		// 创建黑色画刷用于绘制墙和子弹
-		HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0));
-		oldBrush = (HBRUSH)SelectObject(hdcMem, brush);
-
-		// 绘制子弹
-		for (auto& bullet : bulletPool) {
-			bullet->draw(hdcMem);
-		}
 		
+		oldBrush = (HBRUSH)SelectObject(hdcMem, BlackBrush);
+
+		{
+			// 绘制子弹
+			shared_lock<shared_mutex> lock(bpMutex);
+			for (auto& bullet : bulletPool) {
+				bullet->draw(hdcMem);
+			}
+		}
+monitor.EndPerRun();
 		// 绘制墙
 		for (auto& wall : WallPool) {
 			wall->draw(hdcMem);
@@ -363,8 +372,7 @@ namespace TankTrouble
 		
 		// 恢复旧画刷并删除新画刷
 		SelectObject(hdcMem, oldBrush);
-		DeleteObject(brush);
-
+		
 		// 将内存设备上下文的内容复制到窗口设备上下文
 		BitBlt(hdc, 0, 0, WindowWidth, WindowHeight, hdcMem, 0, 0, SRCCOPY);
 
@@ -373,16 +381,21 @@ namespace TankTrouble
 		DeleteDC(hdcMem);
 
 		EndPaint(hwnd, &ps);
-
+		
 	}
 
 	void gameLoop(HWND hwnd) {
+		auto last = high_resolution_clock::now();
+		auto gap = microseconds(2000);
 		while (Running) {
+			auto now = high_resolution_clock::now();
+			if (duration_cast<microseconds>(now - last) < gap) {
+				continue;
+			}
+			last = now;
 			// 标记整个窗口区域为无效，触发 WM_PAINT 消息
 			InvalidateRect(hwnd, NULL, FALSE);
-
-			// 控制帧率
-			std::this_thread::sleep_for(std::chrono::milliseconds(8)); // 约60帧每秒
+			monitor.PerSecond(1000, THROUGHOUT, std::source_location::current());
 		}
 	}
 
@@ -425,7 +438,7 @@ namespace TankTrouble
 		AllocConsole();
 		g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		//char tmp[256] = { 0 };
-		//sprintf_s(tmp, sizeof(tmp), "%d %d %d %d\n", LeftWall, RightWall, UpWall, BottomWall);
+		//sprintf_s(tmp, sizeof(tmp), "%s\n",exePath.string().c_str());
 		//WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
 
 		Running = true;
@@ -455,11 +468,13 @@ namespace TankTrouble
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		// 释放资源
+		unique_lock<shared_mutex> lock(tpMutex);
 		for (auto& Tank : TankPool) {
 			Tank.reset();
 		}
 		TankPool.clear();
 
+		unique_lock<shared_mutex> lock2(bpMutex);
 		for (auto& bullet : bulletPool) {
 			bullet.reset();
 		}

@@ -23,6 +23,9 @@ namespace TankTrouble {
 #define MAP_TYPE			0x2011
 #define TANK_COLOR			0x2012
 
+	/**
+	 * @brief 窗口信息结构体
+	 */
 	struct WidgetInfo {
 		const wchar_t* type;
 		const wchar_t* text;
@@ -35,7 +38,9 @@ namespace TankTrouble {
 		LPARAM iParam;
 		HWND Widget;
 	};
-
+	/**
+	 * @brief 房间窗口类
+	 */
 	class RoomWidget {
 	public:
 		RoomWidget() = default;
@@ -55,12 +60,16 @@ namespace TankTrouble {
 		HWND hwndEditPlayers;
 	};
 
-	//控件信息
+	/**
+	 * @brief 控件信息
+	 */
 	struct ControlsInfo {
 		long id;
 		const wchar_t* text;
 	};
-	//本本框控件的信息
+	/**
+	 * @brief 文本框控件信息
+	 */
 	struct EditInfo {
 		ControlsInfo ctrInfo;
 		//文本框长度是根据Info中字符串的的长度得出的
@@ -100,21 +109,37 @@ namespace TankTrouble {
 	void selectionShow(HWND hwnd);
 	void selectionHide(HWND hwnd);
 
-	/*
-	* 用于生成一组水平方向排列的单选按钮
-	* 其中，(x,y)为最左侧按钮的左上角坐标，(width,height)为控件大小
-	* ControlsInfo表示控件信息，text为按钮显示的文本信息
-	*/
+	/**
+	 * @brief 用于生成一组竖直方向排列的单选按钮,
+	 * 其中，(x,y)为最左侧按钮的左上角坐标，(width,height)为控件大小
+	 * ControlsInfo表示控件信息，text为按钮显示的文本信息
+	 * @param hwnd			窗口句柄
+	 * @param x				最左侧按钮左上角的横坐标
+	 * @param y				最左侧按钮左上角的纵坐标
+	 * @param width			窗口宽度
+	 * @param height		窗口高度
+	 * @param num			按钮数量
+	 * @param info			按钮信息数组
+	 * @param radioGroup	按钮句柄数组
+	 */
 	void CreateRadioGroupHorizontal(
 		HWND hwnd, int x, int y, int width, int height,
 		int num, ControlsInfo* info, HWND radioGroup[]
 	);
 
-	/*
-	* 用于生成一组竖直方向排列的单选按钮
-	* 其中，(x,y)为最左侧按钮的左上角坐标，(width,height)为控件大小
-	* ControlsInfo表示控件信息，text为按钮显示的文本信息
-	*/
+	/**
+	 * @brief 用于生成一组竖直方向排列的单选按钮,
+	 * 其中，(x,y)为最左侧按钮的左上角坐标，(width,height)为控件大小
+	 * ControlsInfo表示控件信息，text为按钮显示的文本信息
+	 * @param hwnd			窗口句柄
+	 * @param x				最上方按钮左上角的横坐标
+	 * @param y				最上方按钮左上角的纵坐标
+	 * @param width			窗口宽度
+	 * @param height		窗口高度
+	 * @param num			按钮数量
+	 * @param info			按钮信息数组
+	 * @param radioGroup	按钮句柄数组
+	 */
 	void CreateRadioGroupVertical(
 		HWND hwnd, int x, int y, int width, int height,
 		int num, ControlsInfo* info, HWND radioGroup[]
