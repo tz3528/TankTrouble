@@ -351,7 +351,7 @@ namespace TankTrouble
 
 	void paintGame(HWND hwnd) {
 
-		monitor.PerSecond(1000,THROUGHOUT,std::source_location::current());
+		monitor.PerSecond(1000);
 		
 		
 		HDC hdc = BeginPaint(hwnd, &ps);
@@ -416,7 +416,7 @@ namespace TankTrouble
 			last = now;
 			// 标记整个窗口区域为无效，触发 WM_PAINT 消息
 			InvalidateRect(hwnd, NULL, FALSE);
-			monitor.PerSecond(1000, THROUGHOUT, std::source_location::current());
+			monitor.PerSecond(1000);
 		}
 	}
 
