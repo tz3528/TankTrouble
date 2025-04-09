@@ -104,7 +104,7 @@ namespace TankTrouble
 	/**
      * @brief Ì¹¿Ë³ØµÄ»¥³âËø
      */
-    extern shared_mutex tpMutex;
+    extern std::mutex  tpMutex;
 
     int TankControl();
 }

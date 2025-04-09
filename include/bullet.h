@@ -42,7 +42,7 @@ namespace TankTrouble
     int bulletPoolUpdate();
 
     extern list<std::shared_ptr<bullet>> bulletPool;
-    extern shared_mutex bpMutex;
+    extern std::mutex bpMutex;
 };
 
 #endif // BULLET_H

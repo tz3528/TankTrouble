@@ -9,7 +9,7 @@
 namespace TankTrouble {
 	
 	list<std::shared_ptr<Tank>> TankPool;
-	shared_mutex tpMutex;
+	std::mutex  tpMutex;
 
 	Tank::Tank(int id, int controller, point position, point direction, int size, const COLORREF& color) :
 		Object(position, direction, color) {
@@ -150,7 +150,7 @@ namespace TankTrouble {
 		lastAttack = now;
 
 		bullets--;
-		unique_lock<std::shared_mutex> lock(bpMutex);
+		std::lock_guard<std::mutex> lock(bpMutex);
 		bulletPool.emplace_back(std::make_shared<bullet>(id, controller, bpos, direction, size, BLACK));
 	}
 
@@ -242,7 +242,7 @@ namespace TankTrouble {
 
 	int TankControl() {
 		{
-			std::unique_lock<std::shared_mutex> lock(tpMutex);
+			std::lock_guard<std::mutex> lock(tpMutex);
 
 			for (auto& Tank : TankPool) {
 				if (Tank == nullptr) continue;

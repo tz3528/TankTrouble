@@ -55,7 +55,7 @@ namespace TankTrouble
 		shuffle(permutation + 1, permutation + Row * Column + 1, gen);
 		
 		{
-			std::unique_lock<std::shared_mutex> lock(tpMutex);
+			std::lock_guard<std::mutex> lock(tpMutex);
 
 			TankPool.emplace_back(make_shared<Tank>(0, PLAYER, getCentrePoint(NtoP(permutation[1])),
 			directions[IntervalRN(gen)], MapSize, PlayerColor));
@@ -72,7 +72,7 @@ namespace TankTrouble
 	void singleGameRestart() {
 		// ÊÍ·Å×ÊÔ´
 		{
-			unique_lock<shared_mutex> lock(tpMutex);
+			std::lock_guard<std::mutex> lock(tpMutex);
 			for (auto& tank : TankPool) {
 				tank.reset();
 			}
@@ -97,7 +97,7 @@ namespace TankTrouble
 			if (Tank->getController() == COMPUTER)
 				continue;
 			{
-                unique_lock<shared_mutex> lock(tpMutex);
+                std::lock_guard<std::mutex> lock(tpMutex);
 				if (wParam == 'J') {
 					Tank->isAttack = true;
 				}
@@ -124,7 +124,7 @@ namespace TankTrouble
 			if (Tank->getController() == COMPUTER)
 				continue;
 			{
-				unique_lock<shared_mutex> lock(tpMutex);
+				std::lock_guard<std::mutex> lock(tpMutex);
 				if (wParam == 'J') {
 					Tank->isAttack = false;
 				}

@@ -10,7 +10,7 @@
 namespace TankTrouble {
 
 	list<std::shared_ptr<bullet>> bulletPool;
-	shared_mutex bpMutex;
+	std::mutex bpMutex;
 
 	bullet::bullet(int id, int controller, point position, point direction, int size, const COLORREF& color) :
 		Object(position, direction, color), radius(0), movingStep(0)
@@ -35,7 +35,7 @@ namespace TankTrouble {
 	}
 
 	bullet::~bullet() {
-		unique_lock<shared_mutex> lock(tpMutex);
+		std::lock_guard<std::mutex > lock(tpMutex);
 		for (auto& Tank : TankPool) {
 			if (Tank->getId() == this->id) {
 				Tank->addbullet();
@@ -117,7 +117,7 @@ namespace TankTrouble {
 
 		if (life >= 590) return;
 		{
-			unique_lock<shared_mutex> lock(tpMutex);
+			std::lock_guard<std::mutex> lock(tpMutex);
 			for (auto Tank = TankPool.begin();Tank != TankPool.end();) {
 				bool IsCollision = false;
 				for (int i = 0;i < 4;i++) {
@@ -142,7 +142,7 @@ namespace TankTrouble {
 	}
 
 	int bulletPoolUpdate() {
-		unique_lock<shared_mutex> lock(bpMutex);
+		std::lock_guard<std::mutex> lock(bpMutex);
 		for (auto bullet = bulletPool.begin(); bullet != bulletPool.end(); ) {
 			(*bullet)->move();
 			if ((*bullet)->getLife() == 0) {
@@ -152,7 +152,6 @@ namespace TankTrouble {
 				bullet++;
 			}
 		}
-        lock.unlock();
 		if (Running) return 10;
 		return 0;
 	}

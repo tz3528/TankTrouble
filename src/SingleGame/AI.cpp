@@ -10,7 +10,7 @@ namespace TankTrouble
     void AIControl(shared_ptr<Tank> Computer){
         while (Running) {
             {
-                unique_lock<shared_mutex> lock(tpMutex);
+                std::lock_guard<std::mutex> lock(tpMutex);
                 if (Computer->isLife == false) {
                     break;
                 }
@@ -30,7 +30,7 @@ namespace TankTrouble
 
         point dir(0, 0);
         //躲避的加权和
-        shared_lock<shared_mutex> lock(bpMutex);
+        std::lock_guard<std::mutex> lock(bpMutex);
         for (auto& bullet : bulletPool) {
             double length = distPointSeg(Computer->getposition(),
                 bullet->TrackSegment.u, bullet->TrackSegment.v);

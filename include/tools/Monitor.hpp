@@ -43,10 +43,10 @@ public:
 	#else
 		localtime_r(&time_t_now, &tm_now); // POSIX ƽ̨
 	#endif
-
+		path += "/Log";
 		std::filesystem::create_directories(path);
 		std::ostringstream oss;
-		oss << path << "/Log/Log" 
+		oss << path << "/Log" 
 			<< std::put_time(&tm_now, "%Y-%m-%d_%H-%M-%S")
 			<< ".csv";
 

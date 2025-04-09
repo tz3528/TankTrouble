@@ -352,7 +352,7 @@ namespace TankTrouble
 	void paintGame(HWND hwnd) {
 
 		monitor.PerSecond(1000,THROUGHOUT,std::source_location::current());
-		monitor.BeginPerRun();
+		
 		
 		HDC hdc = BeginPaint(hwnd, &ps);
 
@@ -363,24 +363,31 @@ namespace TankTrouble
 		BitBlt(hdcMem, 0, 0, WindowWidth, WindowHeight, hdcTemp, 0, 0, SRCCOPY);
 		DeleteDC(hdcTemp);
 		
+		
+		list<shared_ptr<Tank>> tanksCopy;
 		{
-			// 绘制坦克
-			shared_lock<shared_mutex> lock(tpMutex);
-			for (auto& Tank : TankPool) {
-				Tank->draw(hdcMem);
-			}
+			monitor.BeginPerRun();
+			std::lock_guard<std::mutex > lock(tpMutex);
+			monitor.EndPerRun();
+			tanksCopy = TankPool;
+		}
+		//绘制坦克
+		for (auto& Tank : TankPool) {
+			Tank->draw(hdcMem);
 		}
 		
 		// 创建黑色画刷用于绘制墙和子弹
 		
 		HBRUSH oldBrush = (HBRUSH)SelectObject(hdcMem, BlackBrush);
-
+		
+		list<shared_ptr<bullet>> bulletCopy;
 		{
-			// 绘制子弹
-			shared_lock<shared_mutex> lock(bpMutex);
-			for (auto& bullet : bulletPool) {
-				bullet->draw(hdcMem);
-			}
+			std::lock_guard<std::mutex> lock(bpMutex);
+            bulletCopy = bulletPool;
+		}
+		// 绘制子弹
+		for (auto& bullet : bulletCopy) {
+			bullet->draw(hdcMem);
 		}
 		
 		// 绘制墙
@@ -395,7 +402,7 @@ namespace TankTrouble
 		BitBlt(hdc, 0, 0, WindowWidth, WindowHeight, hdcMem, 0, 0, SRCCOPY);
 
 		EndPaint(hwnd, &ps);
-		monitor.EndPerRun();
+		
 	}
 
 	void gameLoop(HWND hwnd) {
@@ -482,13 +489,13 @@ namespace TankTrouble
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		// 释放资源
-		unique_lock<shared_mutex> lock(tpMutex);
+		std::lock_guard<std::mutex > lock(tpMutex);
 		for (auto& Tank : TankPool) {
 			Tank.reset();
 		}
 		TankPool.clear();
 
-		unique_lock<shared_mutex> lock2(bpMutex);
+		std::lock_guard<std::mutex> lock2(bpMutex);
 		for (auto& bullet : bulletPool) {
 			bullet.reset();
 		}
