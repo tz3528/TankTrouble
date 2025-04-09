@@ -64,6 +64,7 @@ namespace TankTrouble
 	void repickMode(HWND hwnd);
 
 	void paintControls(HWND hwnd);
+	void paintWall(HWND hwnd);
 	void paintGame(HWND hwnd);
 
 	void gameLoop(HWND hwnd);

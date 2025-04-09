@@ -19,11 +19,14 @@ namespace TankTrouble
 
 	HANDLE g_hOutput = 0;
 
-	PAINTSTRUCT ps = { 0 };
+	
 	HDC hdcMem;
 	HBITMAP hbmMem;
+
+	PAINTSTRUCT ps = { 0 };
 	HBRUSH WhiteBrush = CreateSolidBrush(RGB(255, 255, 255));
 	HBRUSH BlackBrush = CreateSolidBrush(RGB(0, 0, 0));
+	HBITMAP WhiteBackground;
 
 	LRESULT CALLBACK StartWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
@@ -55,6 +58,25 @@ namespace TankTrouble
 		RightWall = WindowWidth - 24;
 		UpWall = 8;
 		BottomWall = WindowHeight - 48;
+
+		HDC hdc = BeginPaint(hwnd, &ps);
+		// 创建兼容的内存设备上下文和位图
+		hdcMem = CreateCompatibleDC(hdc);
+		hbmMem = CreateCompatibleBitmap(hdc, WindowWidth, WindowHeight);
+		SelectObject(hdcMem, hbmMem);
+
+		WhiteBackground = CreateCompatibleBitmap(hdc, WindowWidth, WindowHeight);
+
+		// 创建一个内存设备上下文
+		HDC hdcTemp = CreateCompatibleDC(hdc);
+		SelectObject(hdcTemp, WhiteBackground);
+		// 填充位图为白色
+		HBRUSH oldBrush = (HBRUSH)SelectObject(hdcTemp, WhiteBrush);
+		RECT rect = { 0, 0, WindowWidth, WindowHeight };
+		FillRect(hdcTemp, &rect, WhiteBrush);
+		SelectObject(hdcTemp, oldBrush);
+		// 删除临时设备上下文
+		DeleteDC(hdcTemp);
 
 		buttonInit(hwnd);
 		radioButtonInit(hwnd);
@@ -334,17 +356,13 @@ namespace TankTrouble
 		
 		HDC hdc = BeginPaint(hwnd, &ps);
 
-		// 创建兼容的内存设备上下文和位图
-		hdcMem = CreateCompatibleDC(hdc);
-		hbmMem = CreateCompatibleBitmap(hdc, WindowWidth, WindowHeight);
-		SelectObject(hdcMem, hbmMem);
-
 		// 填充背景为白色
 		
-		HBRUSH oldBrush = (HBRUSH)SelectObject(hdcMem, WhiteBrush);
-		RECT rect = { 0, 0, WindowWidth, WindowHeight };
-		FillRect(hdcMem, &rect, WhiteBrush);
-
+		HDC hdcTemp = CreateCompatibleDC(hdc);
+		SelectObject(hdcTemp, WhiteBackground);
+		BitBlt(hdcMem, 0, 0, WindowWidth, WindowHeight, hdcTemp, 0, 0, SRCCOPY);
+		DeleteDC(hdcTemp);
+		
 		{
 			// 绘制坦克
 			shared_lock<shared_mutex> lock(tpMutex);
@@ -355,7 +373,7 @@ namespace TankTrouble
 		
 		// 创建黑色画刷用于绘制墙和子弹
 		
-		oldBrush = (HBRUSH)SelectObject(hdcMem, BlackBrush);
+		HBRUSH oldBrush = (HBRUSH)SelectObject(hdcMem, BlackBrush);
 
 		{
 			// 绘制子弹
@@ -364,7 +382,7 @@ namespace TankTrouble
 				bullet->draw(hdcMem);
 			}
 		}
-monitor.EndPerRun();
+		
 		// 绘制墙
 		for (auto& wall : WallPool) {
 			wall->draw(hdcMem);
@@ -376,17 +394,13 @@ monitor.EndPerRun();
 		// 将内存设备上下文的内容复制到窗口设备上下文
 		BitBlt(hdc, 0, 0, WindowWidth, WindowHeight, hdcMem, 0, 0, SRCCOPY);
 
-		// 删除内存设备上下文和位图
-		DeleteObject(hbmMem);
-		DeleteDC(hdcMem);
-
 		EndPaint(hwnd, &ps);
-		
+		monitor.EndPerRun();
 	}
 
 	void gameLoop(HWND hwnd) {
 		auto last = high_resolution_clock::now();
-		auto gap = microseconds(2000);
+		auto gap = microseconds(4000);
 		while (Running) {
 			auto now = high_resolution_clock::now();
 			if (duration_cast<microseconds>(now - last) < gap) {

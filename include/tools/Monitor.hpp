@@ -46,7 +46,7 @@ public:
 
 		std::filesystem::create_directories(path);
 		std::ostringstream oss;
-		oss << path << "/Log" 
+		oss << path << "/Log/Log" 
 			<< std::put_time(&tm_now, "%Y-%m-%d_%H-%M-%S")
 			<< ".csv";
 
