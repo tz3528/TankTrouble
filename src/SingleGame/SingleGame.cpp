@@ -21,6 +21,9 @@ namespace TankTrouble
 		case WM_KEYUP:
 			keyUp(hwnd, wParam);
 			break;
+		case WM_COMMAND:
+			buttonDown(hwnd, wParam);
+			break;
 		case WM_PAINT:
 			paintGame(hwnd);
 			break;
@@ -143,6 +146,23 @@ namespace TankTrouble
 					}
 				}
 			}
+		}
+	}
+
+	static void buttonDown(HWND hwnd, WPARAM wParam) {
+		switch (LOWORD(wParam))
+		{
+		case BEGIN_GAME:
+			selectionHide(hwnd);
+			ShowWindow(hwndButtonBeginGame, SW_HIDE);
+			ShowWindow(hwndButtonBack, SW_HIDE);
+			singleGameInit();
+			threadPool.addTask(gameLoop, hwnd);
+			break;
+		case BACK:
+			repickMode(hwnd);
+			SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)StartWndProc);
+			break;
 		}
 	}
 

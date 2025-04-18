@@ -33,6 +33,55 @@ string toString(const T& t) {
 }
 
 template <typename T>
+T fromStringImpl(const std::string& str, size_t& offset) {
+    //if constexpr 支持泛型的判断
+    if constexpr (std::is_fundamental_v<T> || std::is_enum_v<T>) {
+        if (offset + sizeof(T) > str.size()) {
+            throw std::runtime_error("Insufficient data for fundamental/enum type");
+        }
+        T value;
+        std::memcpy(&value, str.data() + offset, sizeof(T));
+        offset += sizeof(T);
+        return value;
+    } else {
+        // 处理聚合类型（结构体/类）
+        T obj;
+        pfr::for_each_field(obj, [&](auto& field) {
+            using FieldType = std::decay_t<decltype(field)>;
+            field = fromStringImpl<FieldType>(str, offset);
+        });
+        return obj;
+    }
+}
+
+template <typename T>
+T toObject(const std::string& str) {
+    size_t offset = 0;
+    T result = fromStringImpl<T>(str, offset);
+    
+    if (offset != str.size()) {
+        throw std::runtime_error("Extra data remaining in input string");
+    }
+    return result;
+}
+
+template <typename T>
+T toObject(const std::string& str, size_t& offset) {
+    T result = fromStringImpl<T>(str, offset);
+    return result;
+}
+
+template <typename T>
+Container<T> toContainer(const std::string& str,size_t& length) {
+    Container<T> container;
+    while (length != str.size()) {
+        T obj = toObject<T>(str, length);
+        container.emplace_back(obj);
+    }
+    return container;
+}
+
+template <typename T>
 struct ContainerHash {
     size_t operator()(const T& t) const {
         if constexpr (std::is_fundamental_v<T> || std::is_enum_v<T>) {
@@ -60,7 +109,7 @@ struct ContainerEqual {
             auto tuple_rhs = pfr::structure_to_tuple(rhs);
             return std::apply([&](auto&&... lhs_elems) {
                 return std::apply([&](auto&&... rhs_elems) {
-                    // 使用逻辑与的折叠表达式实现短路比较
+                    // 使用逻辑与的折叠表达式实现比较
                     return (... && ContainerEqual<std::decay_t<decltype(lhs_elems)>>{}(
                         lhs_elems,
                         rhs_elems

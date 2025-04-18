@@ -41,19 +41,28 @@ namespace TankTrouble {
 		DEFAULT_PITCH | FF_SWISS,  // 字体间距和族
 		L"Arial"                   // 字体名称
 	);
-
+	/**
+	 * @brief 用于显示开始页面选择游戏模式的菜单栏
+	 * @param hwnd 窗口句柄
+	 */
 	void menuShow(HWND hwnd) {
 		ShowWindow(hwndButtonSingleGame, SW_SHOW);
 		ShowWindow(hwndButtonOnlineGame, SW_SHOW);
 		ShowWindow(hwndButtonCampaign, SW_SHOW);
 	}
-
+	/**
+	 * @brief 用于隐藏开始页面选择游戏模式的菜单栏
+	 * @param hwnd 窗口句柄
+	 */
 	void menuHide(HWND hwnd) {
 		ShowWindow(hwndButtonSingleGame, SW_HIDE);
 		ShowWindow(hwndButtonOnlineGame, SW_HIDE);
 		ShowWindow(hwndButtonCampaign, SW_HIDE);
 	}
-
+	/**
+	 * @brief 用于显示单机模式下的游戏选项
+	 * @param hwnd 窗口句柄
+	 */
 	void selectionShow(HWND hwnd) {
 		for (int i = 0;i < MAX_PLAYER;i++) {
 			ShowWindow(hwndRadioGroupPlayerNumber[i], SW_SHOW);
@@ -70,7 +79,10 @@ namespace TankTrouble {
 		}
 		ShowWindow(hwndEditTankColor, SW_SHOW);
 	}
-
+	/**
+	 * @brief 用于隐藏单机模式下的游戏选项
+	 * @param hwnd 窗口句柄
+	 */
 	void selectionHide(HWND hwnd) {
 		ShowWindow(hwndButtonBeginGame, SW_HIDE);
 		ShowWindow(hwndButtonBack, SW_HIDE);
@@ -151,6 +163,8 @@ namespace TankTrouble {
 		int id, int MaxPlayers, int Players,
 		int x, int y)
 	{
+		this->id = id;
+
 		HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 		if (hEvent == NULL) {
 			throw std::runtime_error("Failed to create event");
@@ -200,7 +214,7 @@ namespace TankTrouble {
 			L"EDIT", tmp,
 			WS_VISIBLE | WS_CHILD | WS_BORDER | ES_CENTER,
 			RoomWidgetWidth / 2 - 150 / 2, 3 * ButtonGap + 30,
-			150, 30, hwndRoot, nullptr,
+			150, 30, hwndRoot, (HMENU)this->id,
 			(HINSTANCE)GetWindowLongPtr(hwndRoot, GWLP_HINSTANCE),
 			(LPARAM)hEvent, nullptr
 		};
@@ -233,6 +247,10 @@ namespace TankTrouble {
         ShowWindow(hwndEditId, SW_SHOW);
         ShowWindow(hwndEditPlayers, SW_SHOW);
         ShowWindow(hwndButtonJoin, SW_SHOW);
+	}
+
+	int RoomWidget::getId(){
+		return this->id;
 	}
 
 }

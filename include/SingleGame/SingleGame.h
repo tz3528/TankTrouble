@@ -16,6 +16,8 @@ namespace TankTrouble
 
 	void keyDown(HWND hwnd, WPARAM wParam);
 	void keyUp(HWND hwnd, WPARAM wParam);
+
+	static void buttonDown(HWND hwnd, WPARAM wParam);
 }
 
 #endif 

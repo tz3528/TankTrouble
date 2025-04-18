@@ -19,7 +19,7 @@ public:
 			std::bind(std::forward<F>(f), std::forward<Args>(args)...);
 
 		{
-			std::unique_lock<std::mutex> lock(mutex);
+			std::lock_guard<std::mutex> lock(mutex);
 			tasks.emplace(std::move(task));
 		}
 

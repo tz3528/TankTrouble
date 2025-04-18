@@ -13,6 +13,8 @@
 #include <fstream>
 #include <filesystem>
 
+namespace fs = std::filesystem;
+
 constexpr short ONC			= 1;
 constexpr short TWO			= 2;
 constexpr short THREE		= 3;
@@ -33,28 +35,18 @@ constexpr short THROUGHOUT	= -1;
  */
 class Monitor {
 public:
-	Monitor(std::string path) {
-		auto now = std::chrono::system_clock::now();
-		auto time_t_now = std::chrono::system_clock::to_time_t(now);
-		std::tm tm_now;
-
-	#ifdef _WIN32
-		localtime_s(&tm_now, &time_t_now); // Windows 平台
-	#else
-		localtime_r(&time_t_now, &tm_now); // POSIX 平台
-	#endif
-		path += "/Log";
-		std::filesystem::create_directories(path);
-		std::ostringstream oss;
-		oss << path << "/Log" 
-			<< std::put_time(&tm_now, "%Y-%m-%d_%H-%M-%S")
-			<< ".csv";
-
-		 filename = oss.str();
-
+	explicit Monitor(const fs::path& logDir){
+		this->logDir = logDir / "Log";
+		CreateDirectory(this->logDir);
+		InitLogFile();
+		WriteCsvHeader();
 	}
 
-	~Monitor() = default;
+	~Monitor() {
+		if (logFile.is_open()) {
+			logFile.close();
+		}
+	}
 
 	
 	inline void BeginPerRun(int times=THROUGHOUT,const std::source_location& location = std::source_location::current());
@@ -66,6 +58,42 @@ private:
 	using TimePoint = high_resolution_clock::time_point;
 
 	TimerManager timerManager = TimerManager();
+
+	void CreateDirectory(const fs::path& dir) {
+		try {
+            std::filesystem::create_directories(dir);
+		}
+		catch (const std::exception& e) {
+			throw std::runtime_error("无法创建日志目录: " + std::string(e.what()));
+		}
+	}
+
+	void InitLogFile() {
+		auto now = std::chrono::system_clock::now();
+		auto time_t_now = std::chrono::system_clock::to_time_t(now);
+		
+		std::tm tm_now;
+
+	#ifdef _WIN32
+		localtime_s(&tm_now, &time_t_now); // Windows 平台
+	#else
+		localtime_r(&time_t_now, &tm_now); // POSIX 平台
+	#endif
+
+        std::ostringstream filename;
+        filename <<"Log " << std::put_time(&tm_now, "%Y-%m-%d_%H-%M-%S") << ".csv";
+        logFilePath = logDir / filename.str();
+
+        logFile.open(logFilePath, std::ios::out | std::ios::app);
+        if (!logFile.is_open()) {
+            throw std::runtime_error("无法打开日志文件: " + logFilePath.string());
+        }
+	}
+
+	void WriteCsvHeader() {
+		std::lock_guard<std::mutex> lock(mutex);
+        logFile << "Timestamp,LogType,Function,Line,ThreadID,File,Duration(us),Calls\n";
+	}
 
 	static std::stack<TimePoint>& GetStack() {
 		thread_local std::stack<TimePoint> stack;
@@ -79,7 +107,9 @@ private:
 	);
 	inline void LogTimer(string functionName,int count,const std::source_location& location,std::thread::id thread_id);
 
-	std::string filename;
+	std::ofstream logFile;
+    fs::path logDir;
+	fs::path logFilePath;
 	std::unordered_map <string, int> RunTable;
 	std::unordered_map <string, std::source_location> FunctionInfo;
 	std::unordered_map <string, int> SecondTable;
@@ -143,7 +173,7 @@ inline void Monitor::PerSecond(int duration, short times,const std::source_locat
 	if (SecondTable.find(function) == SecondTable.end()) {
 		SecondTable[function] = times;
 		timerManager.addTask(
-			std::hash<std::thread::id>{}(std::this_thread::get_id())+std::hash<std::string>{}(location.function_name()), duration,
+			std::hash<std::string>{}(location.function_name()), duration,
 			[this, duration, function, location]() ->int {
 				if (SecondTable[function] == 0) {
 					return 0;
@@ -173,13 +203,6 @@ inline void Monitor::PerSecond(int duration, short times,const std::source_locat
 inline void Monitor::LogDuration(string functionName, int duration,const std::source_location& BeginLocation,const std::source_location& EndLocation,std::thread::id thread_id){
 	std::lock_guard<std::mutex> lock(mutex);
 
-	// 打开日志文件
-	std::ofstream logFile(filename, std::ios::app);
-	if (!logFile.is_open()) {
-		// 如果文件无法打开，可以选择抛出异常或记录错误
-		return;
-	}
-
 	// 写入日志信息
 	logFile << "LogDuration,"	<< functionName << "," 
 			<< "Duration: "		<< duration << "μs,"
@@ -188,8 +211,6 @@ inline void Monitor::LogDuration(string functionName, int duration,const std::so
 			<< "End: "			<< EndLocation.line() << ","
 			<< "ThreadID: "		<< thread_id << ","
 			<< std::endl;
-
-	logFile.close();
 
 }
 /**
@@ -202,13 +223,6 @@ inline void Monitor::LogDuration(string functionName, int duration,const std::so
 inline void Monitor::LogTimer(string functionName,int count,const std::source_location& location,std::thread::id thread_id) {
 	std::lock_guard<std::mutex> lock(mutex);
 
-	// 打开日志文件
-	std::ofstream logFile(filename, std::ios::app);
-	if (!logFile.is_open()) {
-		// 如果文件无法打开，可以选择抛出异常或记录错误
-		return;
-	}
-
 	// 写入日志信息
 	logFile << "LogTimer,"	<< functionName << ","
 			<< "Count: "	<< count << "EPS" << ","
@@ -217,6 +231,5 @@ inline void Monitor::LogTimer(string functionName,int count,const std::source_lo
 			<< "ThreadID: " << thread_id << ","
 			<< std::endl;
 
-	logFile.close();
 }
 

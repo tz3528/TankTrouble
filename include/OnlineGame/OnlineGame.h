@@ -14,8 +14,14 @@ namespace TankTrouble
 #define SOCKET_HEARTBEAT    (SOCKET_INFO + 0)
 #define ROOM_LIST_INFO	    (SOCKET_INFO + 1)
 #define ROOM_INFO			(SOCKET_INFO + 2)
+#define GEGIN_GAME			(SOCKET_INFO + 3)
 
 #define ROOM_NUMBER			5
+
+#define SELECT_ROOM			0xEE00
+#define IN_ROOM				0xEE01
+#define GAMING				0xEE02
+
 	/**
 	 * @brief 房间列表显示的信息
 	 */
@@ -27,12 +33,18 @@ namespace TankTrouble
 	
 	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+	static void buttonDown(HWND hwnd, WPARAM wParam);
+
 	int EstablishSocket();
 	/**
 	 * @brief		初始化联机游戏资源，连接服务器
 	 * @param hwnd 窗口句柄
 	 */
 	void onlineGameInit(HWND hwnd);
+
+	void RoomShow();
+
+	void RoomHide();
 	/**
 	 * @brief		将前四个字符转换为一个int类型
 	 * @param str	收到的信息
@@ -53,7 +65,11 @@ namespace TankTrouble
 	 * @brief	定时任务，用于发送心跳包
 	 * @return	距离下一次发送心跳包的时间
 	 */
-	int socket_heartbeat();
+	int SendSocketHeartbeat();
+
+	void SendRoomListInfo();
+
+	void SendRoomInfo(int id);
 	/**
 	 * @brief			解析房间列表信息，并更新房间列表
 	 * @param hwnd		窗口句柄
@@ -68,6 +84,8 @@ namespace TankTrouble
 	 * @param len		信息长度
 	 */
 	void updateRoomInfo(HWND hwnd,const char* message, int len);
+
+	void BeginGame(HWND hwnd,const char* message, int len);
 
 }
 

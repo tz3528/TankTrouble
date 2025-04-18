@@ -7,17 +7,20 @@ namespace TankTrouble
 	int fd;
 	bool OnlineGame = true;
 	bool SocketHeartbeat = true;
+	int Status;
+
+	char tmp[256] = { 0 };
+	HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+
 
 	LRESULT CALLBACK OnlineGameWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		WidgetInfo* params = (WidgetInfo*)lParam;
-		HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-		char tmp[256] = { 0 };
 		
 		switch (message)
 		{
 		case WM_COMMAND:
-
+			buttonDown(hwnd,wParam);
 			break;
 		case WM_KEYDOWN:
 			break;
@@ -59,6 +62,40 @@ namespace TankTrouble
 		return 0;
 	}
 
+	static void buttonDown(HWND hwnd, WPARAM wParam) {
+		switch (LOWORD(wParam))
+		{
+		case BACK:
+			switch (Status)
+			{
+			case SELECT_ROOM:
+				OnlineGame = false;
+				repickMode(hwnd);
+				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)StartWndProc);
+				break;
+			case IN_ROOM:
+				selectionShow(hwnd);
+				ShowWindow(hwndButtonBeginGame, SW_HIDE);
+				ShowWindow(hwndButtonBack, SW_HIDE);
+				RoomHide();
+				SendRoomListInfo();
+				break;
+			}
+			
+			break;
+		case BEGIN_GAME:
+		{
+			string message = toString(BEGIN_GAME);
+			send(fd, message.c_str(), message.size(), 0);
+			break;
+		}
+		default:
+			Status = IN_ROOM;
+			
+			break;
+		}
+	}
+
 	int EstablishSocket() {
 
 		HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -93,11 +130,10 @@ namespace TankTrouble
 	}
 
 	void onlineGameInit(HWND hwnd) {
-		char tmp[256] = { 0 };
-		HANDLE g_hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-		sprintf_s(tmp, sizeof(tmp), "1\n");
-		WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
-		
+		Status = SELECT_ROOM;
+		OnlineGame = true;
+
+	
 		//1.初始化网络库
 		WSADATA wsaData;
 		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -108,16 +144,9 @@ namespace TankTrouble
 
 		fd = EstablishSocket();
 
-		std::string init = toString(ROOM_LIST_INFO);
-		size_t result = send(fd, init.c_str(), init.size(), 0);
-		if (result == SOCKET_ERROR) {
-			int errorCode = WSAGetLastError();
-			// 处理错误
-			sprintf_s(tmp, sizeof(tmp), "%d\n", errorCode);
-			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
-		}
 		
-		timerManager.addTask(SOCKET_HEARTBEAT, 5000, socket_heartbeat);
+		
+		timerManager.addTask(SOCKET_HEARTBEAT, 5000, SendSocketHeartbeat);
 
 		while (OnlineGame) {
 			char message[1024] = { 0 };
@@ -141,6 +170,18 @@ namespace TankTrouble
 
 	}
 
+	void RoomShow() {
+		for (int i = 0;i < 5;i++) {
+			Room[i].Show();
+		}
+	}
+
+	void RoomHide(){
+		for (int i = 0;i < 5;i++) {
+            Room[i].Hide();
+		}
+	}
+
 	int CtoI(const char*& str, int& len) {
 		len += 4;
 		int sum = (unsigned char)str[0] | ((unsigned char)str[1] << 8) | ((unsigned char)str[2] << 16) | ((unsigned char)str[3] << 24);
@@ -158,6 +199,10 @@ namespace TankTrouble
 			updateRoomList(hwnd, message, len);
 			break;
 		case ROOM_INFO:
+			updateRoomInfo(hwnd, message, len);
+			break;
+		case BEGIN_GAME:
+			BeginGame(hwnd,message,len);
 			break;
 		default:
 			break;
@@ -165,7 +210,7 @@ namespace TankTrouble
 		
 	}
 
-	int socket_heartbeat() {
+	int SendSocketHeartbeat() {
 		if (!SocketHeartbeat) {
 			OnlineGame = false;
 			return 0;
@@ -173,6 +218,22 @@ namespace TankTrouble
         string heartbeat = toString(SOCKET_HEARTBEAT);
         send(fd, heartbeat.c_str(), heartbeat.size(), 0);
 		return 5000;
+	}
+
+	void SendRoomListInfo(){
+		std::string message = toString(ROOM_LIST_INFO);
+		size_t result = send(fd, message.c_str(), message.size(), 0);
+		if (result == SOCKET_ERROR) {
+			int errorCode = WSAGetLastError();
+			// 处理错误
+			sprintf_s(tmp, sizeof(tmp), "%d\n", errorCode);
+			WriteConsoleA(g_hOutput, tmp, (DWORD)strlen(tmp), nullptr, nullptr);
+		}
+	}
+
+	void SendRoomInfo(int id){
+		string message = toString(ROOM_INFO)+toString(id);
+        send(fd, message.c_str(), message.size(), 0);
 	}
 
 	void updateRoomList(HWND hwnd,const char* message,int len) {
@@ -197,6 +258,23 @@ namespace TankTrouble
 	}
 
 	void updateRoomInfo(HWND hwnd,const char* message, int len) {
+		int Players = CtoI(message, len);
+		SendMessage(hwndRadioGroupPlayerNumber[Players], BM_SETCHECK, BST_CHECKED, 0);
+		int Map = CtoI(message, len);
+        SendMessage(hwndRadioGroupMapType[Map], BM_SETCHECK, BST_CHECKED, 0);
+
+
+	}
+
+	void BeginGame(HWND hwnd,char* message, int len) {
+		selectionShow(hwnd);
+		ShowWindow(hwndButtonBeginGame, SW_HIDE);
+		ShowWindow(hwndButtonBack, SW_HIDE);
+
+		int WallNum = CtoI(message, len);
+		for (int i = 0;i < WallNum;i++) {
+			WallPool.emplace_back(toObject<Wall>(message));
+		}
 
 	}
 

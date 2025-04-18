@@ -59,12 +59,11 @@ namespace TankTrouble
 	void buttonInit(HWND hwnd);
 	void radioButtonInit(HWND hwnd);
 
-	void buttonDown(HWND hwnd, WPARAM wParam);
+	static void buttonDown(HWND hwnd, WPARAM wParam);
 	void selectGameMode(HWND hwnd);
 	void repickMode(HWND hwnd);
 
 	void paintControls(HWND hwnd);
-	void paintWall(HWND hwnd);
 	void paintGame(HWND hwnd);
 
 	void gameLoop(HWND hwnd);

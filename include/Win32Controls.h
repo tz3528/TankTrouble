@@ -53,7 +53,10 @@ namespace TankTrouble {
 		void Hide();
         void Show();
 
+		int getId();
+
 	private:
+		int id;
 		HWND hwndRoot;
 		HWND hwndButtonJoin;
 		HWND hwndEditId;

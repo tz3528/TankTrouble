@@ -7,8 +7,6 @@ Monitor monitor = Monitor(exePath.string());
 
 namespace TankTrouble
 {
-	std::mutex uiMutex;
-	std::condition_variable uiCv;
 	bool update;
 
 	int Running;
@@ -18,7 +16,6 @@ namespace TankTrouble
 	COLORREF PlayerColor;
 
 	HANDLE g_hOutput = 0;
-
 	
 	HDC hdcMem;
 	HBITMAP hbmMem;
@@ -229,46 +226,25 @@ namespace TankTrouble
 		ShowWindow(hwndEditTankColor, SW_HIDE);
 	}
 
-	void buttonDown(HWND hwnd, WPARAM wParam){
+	static void buttonDown(HWND hwnd, WPARAM wParam){
+		selectionHide(hwnd);
 		//用于判断是否选择了游戏模式
 		switch (LOWORD(wParam))
 		{
 		case SINGLE_GAME:
 			selectionShow(hwnd);
 			selectGameMode(hwnd);
-			GameMode = SINGLE_GAME;
+			SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
 			break;
 		case ONLINE_GAME:
-			selectGameMode(hwnd);
-			GameMode = ONLINE_GAME;
+			menuHide(hwnd);
+			ShowWindow(hwndButtonBack, SW_SHOW);
+			threadPool.addTask(onlineGameInit,hwnd);
+			SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
 			break;
 		case CAMPAIGN:
-			GameMode = CAMPAIGN;
+			SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CampaignWndProc);
 			break;
-		case BEGIN_GAME:
-			selectionHide(hwnd);
-			switch (GameMode) 
-			{
-			case SINGLE_GAME:
-				threadPool.addTask(gameLoop, hwnd);
-				singleGameInit();
-				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)SingleGameWndProc);
-				break;
-			case ONLINE_GAME:
-				threadPool.addTask(onlineGameInit,hwnd);
-				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OnlineGameWndProc);
-				break;
-			case CAMPAIGN:
-				SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)CampaignWndProc);
-				break;
-			}
-			ShowWindow(hwndButtonBeginGame, SW_HIDE);
-			ShowWindow(hwndButtonBack, SW_HIDE);
-			InvalidateRect(hwnd, nullptr, TRUE);
-			return ;
-		case BACK:
-			repickMode(hwnd);
-			return ;
 		}
 		InvalidateRect(hwnd, nullptr, TRUE);
 	}
