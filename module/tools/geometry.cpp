@@ -1,10 +1,10 @@
-#include "tools/geometry.h"
+#include "geometry.h"
 
 #include <stdexcept>
 
 using std::min, std::max, std::swap;
 
-namespace TankTrouble {
+namespace geometry {
 
 	point point::operator+(const point& other) const {
 		return point(this->x + other.x, this->y + other.y);
@@ -149,3 +149,4 @@ namespace TankTrouble {
 	}
 
 }
+

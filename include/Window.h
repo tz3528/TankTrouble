@@ -38,8 +38,6 @@ namespace TankTrouble
 #define SEVEN_PLAYER		(NO_PLAYER + 7)
 #define EIGHT_PLAYER		(NO_PLAYER + 8)
 
-	
-
 	extern HDC hdcMem;
 	extern HBITMAP hbmMem;
 	extern int Running;

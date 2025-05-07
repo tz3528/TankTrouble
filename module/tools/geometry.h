@@ -4,7 +4,7 @@
 #include <math.h>
 #include <Windows.h>
 
-namespace TankTrouble
+namespace geometry
 {
     const double eps = 1e-2;
     const double pi = acos(-1);

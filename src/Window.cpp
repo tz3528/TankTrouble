@@ -457,25 +457,29 @@ namespace TankTrouble
 				//WriteConsole(g_hOutput, L"2222", 4, nullptr,nullptr);
 			}
 		}
+
 		/*这里停掉线程
 		* 避免提前释放了资源,造成访问野指针
 		*/
-
 		Running = false;
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		// 释放资源
-		std::lock_guard<std::mutex > lock(tpMutex);
-		for (auto& Tank : TankPool) {
-			Tank.reset();
+		{
+			std::lock_guard<std::mutex > lock(tpMutex);
+			for (auto& Tank : TankPool) {
+				Tank.reset();
+			}
+			TankPool.clear();
 		}
-		TankPool.clear();
-
-		std::lock_guard<std::mutex> lock2(bpMutex);
-		for (auto& bullet : bulletPool) {
-			bullet.reset();
+		
+		{
+			std::lock_guard<std::mutex> lock(bpMutex);
+			for (auto& bullet : bulletPool) {
+				bullet.reset();
+			}
+			bulletPool.clear();
 		}
-		bulletPool.clear();
 
 		for (auto& wall : WallPool) {
 			wall.reset();

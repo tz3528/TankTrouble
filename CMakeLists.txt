@@ -35,7 +35,14 @@ include_directories(${BOOST_INCLUDE})
 file(GLOB_RECURSE MAIN_SRC "${CMAKE_SOURCE_DIR}/src/*.cpp")
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
-add_executable(TankTrouble WIN32 ${MAIN_SRC})
+file(GLOB_RECURSE MODULE_SRC "${CMAKE_SOURCE_DIR}/module/*.cpp")
+include_directories("${CMAKE_SOURCE_DIR}/module")
+
+# 将所有 .cpp 文件合并到一起
+set(ALL_SRC ${MAIN_SRC} ${MODULE_SRC})
+
+# 添加可执行文件
+add_executable(TankTrouble WIN32 ${ALL_SRC})
 
 # 链接 Windows 库
 target_link_libraries(TankTrouble PRIVATE gdi32 user32 kernel32 ws2_32)

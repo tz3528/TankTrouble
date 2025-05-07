@@ -7,6 +7,8 @@
 #include <memory>
 #include <iostream>
 
+
+
 namespace TankTrouble {
 
 	list<std::shared_ptr<bullet>> bulletPool;
@@ -57,12 +59,12 @@ namespace TankTrouble {
 	}
 
 	void bullet::getTrack() {
-		line l1(position, position + direction);
+		geometry::line l1(position, position + direction);
 		point v;
 		double legth = 1e18;
 
 		auto f = [&](point a, point b) {
-			line l2(a, b);
+			geometry::line l2(a, b);
 			if ((l1.v ^ l2.v) == 0) return;
 			point tmp = itsLineLine(l1, l2);
 			//如果不在移动方向上

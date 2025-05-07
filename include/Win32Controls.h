@@ -87,7 +87,7 @@ namespace TankTrouble {
 	static int ButtonGap = 20;
 	static int EditHeight = 30;
 	static int RoomWidgetWidth = 200;
-    static int RoomWidgetHeight = 300;
+    static int RoomWidgetHeight = 250;
 
 	//°´Å¥
 	extern HWND hwndButtonSingleGame;

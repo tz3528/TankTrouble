@@ -159,6 +159,7 @@ namespace TankTrouble {
 	}
 
 	void Tank::draw(HDC hdcMem) {
+		if(!isLife) return;
 		HBRUSH brush = CreateSolidBrush(color);
 		HBRUSH oldBrush = (HBRUSH)SelectObject(hdcMem, brush);
 		Polygon(hdcMem, toPOINT(body, 4), 4);

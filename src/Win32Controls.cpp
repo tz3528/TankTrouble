@@ -214,7 +214,7 @@ namespace TankTrouble {
 			L"EDIT", tmp,
 			WS_VISIBLE | WS_CHILD | WS_BORDER | ES_CENTER,
 			RoomWidgetWidth / 2 - 150 / 2, 3 * ButtonGap + 30,
-			150, 30, hwndRoot, (HMENU)this->id,
+			150, 30, hwndRoot, nullptr,
 			(HINSTANCE)GetWindowLongPtr(hwndRoot, GWLP_HINSTANCE),
 			(LPARAM)hEvent, nullptr
 		};
@@ -227,7 +227,7 @@ namespace TankTrouble {
 			L"BUTTON", tmp,
 			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
 			RoomWidgetWidth / 2 - 150 / 2, 5 * ButtonGap + 2 * 30,
-			150, 30, hwndRoot, nullptr,
+			150, 30, hwndRoot, (HMENU)this->id,
 			(HINSTANCE)GetWindowLongPtr(hwndRoot, GWLP_HINSTANCE),
 			(LPARAM)hEvent, nullptr
 		};

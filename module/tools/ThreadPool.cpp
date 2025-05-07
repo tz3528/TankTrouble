@@ -1,4 +1,4 @@
-#include "tools/ThreadPool.h"
+#include "ThreadPool.h"
 
 ThreadPool::ThreadPool(int ThreadNumber)
     :stop(false) {

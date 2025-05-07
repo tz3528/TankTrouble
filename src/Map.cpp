@@ -66,8 +66,6 @@ namespace TankTrouble {
         Rectangle(hdcMem, (int)LeftUp.x, (int)LeftUp.y, (int)RightDown.x, (int)RightDown.y);
     }
 
-
-
     int PtoN(GridPosition pos){
         return (pos.row - 1) * Column + pos.column;
     }

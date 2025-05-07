@@ -18,6 +18,7 @@ namespace TankTrouble
     class Tank :public Object
     {
     public:
+        Tank() = default;
         Tank(int id, int controller, point position, point direction, int size, const COLORREF& color);
         ~Tank();
 		/**
@@ -88,6 +89,7 @@ namespace TankTrouble
         int controller;
         double movingStep, length, width;
         point tmpPosition, tmpDirection;
+        // ¹¥»÷¼ä¸ô
         const int attackInterval = 200;
 
         std::chrono::steady_clock::time_point lastAttack;

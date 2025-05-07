@@ -52,7 +52,6 @@ public:
 	inline void BeginPerRun(int times=THROUGHOUT,const std::source_location& location = std::source_location::current());
 	inline void EndPerRun(const std::source_location& location = std::source_location::current());
 
-
 	inline void PerSecond(int duration, short times=THROUGHOUT,const std::source_location& location = std::source_location::current());
 private:
 	using TimePoint = high_resolution_clock::time_point;

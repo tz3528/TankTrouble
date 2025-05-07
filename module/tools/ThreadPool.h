@@ -1,8 +1,6 @@
 #ifndef THREAD_POOL_H
 #define THREAD_POOL_H
 
-#include "pch.h"
-
 #include <thread>
 #include <queue>
 #include <vector>
@@ -17,7 +15,6 @@ public:
 	void addTask(F&& f, Args ... args) {
 		std::function<void()> task =
 			std::bind(std::forward<F>(f), std::forward<Args>(args)...);
-
 		{
 			std::lock_guard<std::mutex> lock(mutex);
 			tasks.emplace(std::move(task));

@@ -7,6 +7,7 @@ namespace TankTrouble {
 	class Object
 	{
 	public:
+		Object() = default;
 		Object(point position, point direction, COLORREF color);
 		virtual void draw(HDC hdcMem) = 0;
 

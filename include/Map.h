@@ -30,6 +30,7 @@ namespace TankTrouble
 	class Wall
 	{
 	public:
+		Wall() = default;
 		Wall(point u, point v, int size);
 		~Wall();
 

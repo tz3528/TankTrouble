@@ -6,6 +6,7 @@
 #include "tools/Monitor.hpp"
 #include "tools/TimerManager.hpp"
 #include "tools/ThreadPool.h"
+#include "tools/MemoryPool.h"
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -20,7 +21,7 @@
 #include <vector>
 #include <atomic>
 
-
+using namespace geometry;
 
 using std::shared_lock, std::shared_mutex, std::unique_lock;
 using std::condition_variable;

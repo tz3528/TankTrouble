@@ -95,7 +95,7 @@ namespace TankTrouble
         singleGameInit();
 	}
 
-	void keyDown(HWND hwnd, WPARAM wParam) {
+	static void keyDown(HWND hwnd, WPARAM wParam) {
 		for (auto& Tank : TankPool) {
 			if (Tank->getController() == COMPUTER)
 				continue;
@@ -122,7 +122,7 @@ namespace TankTrouble
 		}
 	}
 
-	void keyUp(HWND hwnd, WPARAM wParam) {
+	static void keyUp(HWND hwnd, WPARAM wParam) {
 		for (auto& Tank : TankPool) {
 			if (Tank->getController() == COMPUTER)
 				continue;
